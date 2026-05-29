@@ -36,6 +36,9 @@ export function ProfileScreen({ onNavigate, isSignedIn, onSignIn, onSignOut }) {
           <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>mahima@taxchambers.in</p>
         </div>
         <button style={{ marginLeft: "auto", background: "none", border: "none", display: "flex" }}><Ic.Edit c="var(--muted)" s={18} /></button>
+        <button onClick={() => onNavigate("admin")}>
+  Open Admin
+</button>
       </div>
       <div style={{ display: "flex", borderBottom: "0.5px solid var(--border)", flexShrink: 0 }}>
         {[["24", "Saved"], ["148", "Read"], ["12", "Mira chats"]].map(([number, label], index) => (

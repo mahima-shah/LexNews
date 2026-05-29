@@ -7,6 +7,7 @@ import { SavedScreen } from "../screens/SavedScreen.jsx";
 import { ProfileScreen } from "../screens/ProfileScreen.jsx";
 import { useAuth } from "../hooks/useAuth.js";
 import { useSavedArticles } from "../hooks/useSavedArticles.js";
+import { AdminScreen } from "../screens/AdminScreen.jsx";
 
 export default function App() {
   const [screen, setScreen] = useState("home");
@@ -35,6 +36,8 @@ export default function App() {
       {screen === "search" && <SearchScreen onNavigate={handleNavigate} />}
       {screen === "saved" && <SavedScreen onNavigate={handleNavigate} savedIds={savedIds} onSave={toggleSave} isSignedIn={isSignedIn} onNeedSignIn={handleNeedSignIn} />}
       {screen === "profile" && <ProfileScreen onNavigate={handleNavigate} isSignedIn={isSignedIn} onSignIn={() => setShowSignIn(true)} onSignOut={signOut} />}
+      {screen === "admin" && <AdminScreen onNavigate={handleNavigate} />}
+      
       <MiraPanel open={miraOpen} onClose={() => setMiraOpen(false)} />
       {showSignIn && <SignInModal onSuccess={handleSignInSuccess} onCancel={() => setShowSignIn(false)} />}
     </div>
