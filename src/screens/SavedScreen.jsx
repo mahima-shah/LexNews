@@ -65,7 +65,7 @@ export function SavedScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSi
               key={article.id}
               article={article}
               onClick={() => openReader(index)}
-              saved={savedIds.includes(article.id)}
+              saved={isSignedIn && savedIds.includes(article.id)}
               onSave={onSave}
             />
           ))

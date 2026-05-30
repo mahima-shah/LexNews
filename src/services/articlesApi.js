@@ -4,6 +4,7 @@ export async function fetchArticles() {
   const { data, error } = await supabase
     .from('articles')
     .select('*')
+    .eq("status", "approved")
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -28,3 +29,17 @@ export async function searchArticles(query) {
 
   return data
 }
+
+export async function createArticle(article) {
+    const { data, error } = await supabase
+      .from("articles")
+      .insert([article])
+      .select();
+  
+    if (error) {
+      console.error(error);
+      return { success: false, error };
+    }
+  
+    return { success: true, data };
+  }

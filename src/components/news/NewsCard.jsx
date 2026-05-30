@@ -2,7 +2,7 @@ import { Ic } from "../../constants/icons.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
 import { Tag } from "./Tag.jsx";
 
-export function NewsCard({ article, onClick, saved, onSave }) {
+export function NewsCard({ article, onClick, saved, onSave, onShare }) {
   return (
     <div className="news-card" onClick={onClick}>
       <ArticleImage article={article} height={160} />
@@ -18,7 +18,21 @@ export function NewsCard({ article, onClick, saved, onSave }) {
         <button onClick={() => onSave(article.id)} style={{ background: "none", border: "none", display: "flex", padding: 4 }}>
           <Ic.Bookmark s={18} c={saved ? "var(--ink)" : "var(--muted)"} fill={saved ? "var(--ink)" : "none"} />
         </button>
-        <button style={{ background: "none", border: "none", display: "flex", padding: 4 }}><Ic.Share s={18} c="var(--muted)" /></button>
+        <button
+          onClick={(event) => {
+            event.stopPropagation();
+            if (onShare) onShare(article);
+          }}
+          style={{
+            background: "none",
+            border: "none",
+            display: "flex",
+            padding: 4,
+            cursor: "pointer",
+          }}
+        >
+          <Ic.Share s={18} c="var(--muted)" />
+        </button>
         <button style={{ background: "none", border: "none", display: "flex", padding: 4 }}><Ic.More s={18} c="var(--muted)" /></button>
       </div>
       <div style={{ padding: "0 14px 12px" }}>

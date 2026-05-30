@@ -8,6 +8,7 @@ import { ProfileScreen } from "../screens/ProfileScreen.jsx";
 import { useAuth } from "../hooks/useAuth.js";
 import { useSavedArticles } from "../hooks/useSavedArticles.js";
 import { AdminScreen } from "../screens/AdminScreen.jsx";
+import { ShareSheet } from "../components/ui/ShareSheet.jsx";
 
 export default function App() {
   const [screen, setScreen] = useState("home");
@@ -15,7 +16,9 @@ export default function App() {
   const [showSignIn, setShowSignIn] = useState(false);
   const { isSignedIn, signIn, signOut } = useAuth();
   const { savedIds, toggleSave } = useSavedArticles();
-
+  const [shareArticle, setShareArticle] = useState(null);
+  console.log("shareArticle:", shareArticle);
+  
   const handleNavigate = (id) => {
     if (id === "mira") {
       setMiraOpen(true);
@@ -32,14 +35,66 @@ export default function App() {
 
   return (
     <div className="app">
-      {screen === "home" && <HomeScreen onNavigate={handleNavigate} savedIds={savedIds} onSave={toggleSave} isSignedIn={isSignedIn} onNeedSignIn={handleNeedSignIn} />}
-      {screen === "search" && <SearchScreen onNavigate={handleNavigate} />}
-      {screen === "saved" && <SavedScreen onNavigate={handleNavigate} savedIds={savedIds} onSave={toggleSave} isSignedIn={isSignedIn} onNeedSignIn={handleNeedSignIn} />}
-      {screen === "profile" && <ProfileScreen onNavigate={handleNavigate} isSignedIn={isSignedIn} onSignIn={() => setShowSignIn(true)} onSignOut={signOut} />}
-      {screen === "admin" && <AdminScreen onNavigate={handleNavigate} />}
-      
-      <MiraPanel open={miraOpen} onClose={() => setMiraOpen(false)} />
-      {showSignIn && <SignInModal onSuccess={handleSignInSuccess} onCancel={() => setShowSignIn(false)} />}
+      {screen === "home" && (
+        <HomeScreen
+          onNavigate={handleNavigate}
+          savedIds={savedIds}
+          onSave={toggleSave}
+          isSignedIn={isSignedIn}
+          onNeedSignIn={handleNeedSignIn}
+          onShare={setShareArticle}
+        />
+      )}
+  
+      {screen === "search" && (
+        <SearchScreen
+          onNavigate={handleNavigate}
+        />
+      )}
+  
+      {screen === "saved" && (
+        <SavedScreen
+          onNavigate={handleNavigate}
+          savedIds={savedIds}
+          onSave={toggleSave}
+          isSignedIn={isSignedIn}
+          onNeedSignIn={handleNeedSignIn}
+        />
+      )}
+  
+      {screen === "profile" && (
+        <ProfileScreen
+          onNavigate={handleNavigate}
+          isSignedIn={isSignedIn}
+          onSignIn={() => setShowSignIn(true)}
+          onSignOut={signOut}
+        />
+      )}
+  
+      {screen === "admin" && (
+        <AdminScreen
+          onNavigate={handleNavigate}
+        />
+      )}
+  
+      <MiraPanel
+        open={miraOpen}
+        onClose={() => setMiraOpen(false)}
+      />
+  
+      {shareArticle && (
+        <ShareSheet
+          article={shareArticle}
+          onClose={() => setShareArticle(null)}
+        />
+      )}
+  
+      {showSignIn && (
+        <SignInModal
+          onSuccess={handleSignInSuccess}
+          onCancel={() => setShowSignIn(false)}
+        />
+      )}
     </div>
   );
 }

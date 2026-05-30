@@ -8,7 +8,7 @@ import { ArticleReader } from "../components/news/ArticleReader.jsx";
 import { Pill } from "../components/ui/Pill.jsx";
 import { formatArticle } from "../utils/formatArticle.js";
 
-export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSignIn }) {
+export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSignIn, onShare }) {
   const [category, setCategory] = useState("all");
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,8 +85,9 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSig
               key={article.id}
               article={article}
               onClick={() => openReader(index)}
-              saved={savedIds.includes(article.id)}
+              saved={isSignedIn && savedIds.includes(article.id)}
               onSave={handleSave}
+              onShare={onShare}
             />
           ))
         )}
@@ -102,6 +103,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSig
             onClose={() => setReaderOpen(false)}
             savedIds={savedIds}
             onSave={handleSave}
+            onShare={onShare}
           />
         )}
       </div>

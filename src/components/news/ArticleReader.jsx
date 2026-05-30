@@ -4,7 +4,7 @@ import { IconButton } from "../ui/IconButton.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
 import { Tag } from "./Tag.jsx";
 
-export function ArticleReader({ articles, startIndex, onClose, savedIds, onSave }) {
+export function ArticleReader({ articles, startIndex, onClose, savedIds, onSave, onShare }) {
   const slidesRef = useRef(null);
 
   useEffect(() => {
@@ -14,13 +14,13 @@ export function ArticleReader({ articles, startIndex, onClose, savedIds, onSave 
   return (
     <div className="reader-slides" ref={slidesRef}>
       {articles.map((article, index) => (
-        <ReaderSlide key={article.id} article={article} onClose={onClose} saved={savedIds.includes(article.id)} onSave={onSave} isLast={index === articles.length - 1} />
+        <ReaderSlide key={article.id} article={article} onClose={onClose} saved={savedIds.includes(article.id)} onSave={onSave} onShare={onShare} isLast={index === articles.length - 1} />
       ))}
     </div>
   );
 }
 
-function ReaderSlide({ article, onClose, saved, onSave, isLast }) {
+function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast }) {
   return (
     <div className="reader-slide">
       <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
@@ -28,7 +28,14 @@ function ReaderSlide({ article, onClose, saved, onSave, isLast }) {
       </div>
       <div style={{ position: "absolute", top: 16, right: 16, zIndex: 10, display: "flex", gap: 8 }}>
         <IconButton onClick={() => onSave(article.id)} label="Save article"><Ic.Bookmark s={18} c={saved ? "var(--ink)" : "var(--muted)"} fill={saved ? "var(--ink)" : "none"} /></IconButton>
-        <IconButton label="Share article"><Ic.Share s={18} c="var(--muted)" /></IconButton>
+        <IconButton
+          label="Share article"
+          onClick={() => {
+            if (onShare) onShare(article);
+          }}
+        >
+          <Ic.Share s={18} c="var(--muted)" />
+        </IconButton>
         <IconButton label="More options"><Ic.More s={18} c="var(--muted)" /></IconButton>
       </div>
       <ArticleImage article={article} height={280} />
