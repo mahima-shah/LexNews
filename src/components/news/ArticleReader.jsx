@@ -4,7 +4,7 @@ import { IconButton } from "../ui/IconButton.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
 import { Tag } from "./Tag.jsx";
 
-export function ArticleReader({ articles, startIndex, onClose, savedIds, onSave, onShare }) {
+export function ArticleReader({ articles, startIndex, onClose, onGoHome, savedIds, onSave, onShare }) {
   const slidesRef = useRef(null);
 
   useEffect(() => {
@@ -16,6 +16,7 @@ export function ArticleReader({ articles, startIndex, onClose, savedIds, onSave,
       {articles.map((article, index) => (
         <ReaderSlide key={article.id} article={article} onClose={onClose} saved={savedIds.includes(article.id)} onSave={onSave} onShare={onShare} isLast={index === articles.length - 1} />
       ))}
+      <EndOfNewsSlide onClose={onGoHome || onClose} />
     </div>
   );
 }
@@ -58,6 +59,58 @@ function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast }) {
           {!isLast && <p style={{ textAlign: "center", fontSize: 11, color: "var(--muted)", letterSpacing: 0.3, paddingBottom: 8 }}>Swipe up for next article</p>}
         </div>
       </div>
+    </div>
+  );
+}
+
+function EndOfNewsSlide({ onClose }) {
+  return (
+    <div
+      className="reader-slide"
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 32,
+        textAlign: "center",
+      }}
+    >
+      <p
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 24,
+          fontWeight: 600,
+          color: "var(--ink)",
+          marginBottom: 8,
+        }}
+      >
+        You’re all caught up
+      </p>
+
+      <p
+        style={{
+          fontSize: 13,
+          color: "var(--muted)",
+          lineHeight: 1.6,
+          marginBottom: 20,
+        }}
+      >
+        You’ve reached the end of this news feed.
+      </p>
+
+      <button
+        onClick={onClose}
+        style={{
+          padding: "12px 22px",
+          background: "var(--ink)",
+          color: "#fff",
+          border: "none",
+          borderRadius: 12,
+          fontSize: 13,
+          fontWeight: 500,
+        }}
+      >
+        Back to feed
+      </button>
     </div>
   );
 }

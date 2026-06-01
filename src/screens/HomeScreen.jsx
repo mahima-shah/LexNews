@@ -8,7 +8,7 @@ import { ArticleReader } from "../components/news/ArticleReader.jsx";
 import { Pill } from "../components/ui/Pill.jsx";
 import { formatArticle } from "../utils/formatArticle.js";
 
-export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSignIn, onShare }) {
+export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onNeedSignIn, onShare }) {
   const [category, setCategory] = useState("all");
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +76,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSig
         ))}
       </div>
 
-      <div className="card-feed" style={{ paddingTop: 12 }}>
+      <div className="card-feed">
         {filtered.length === 0 ? (
           <p style={{ padding: 16, color: "var(--muted)", fontSize: 13 }}>No articles found.</p>
         ) : (
@@ -101,6 +101,10 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSig
             articles={readerArticles}
             startIndex={readerStart}
             onClose={() => setReaderOpen(false)}
+            onGoHome={() => {
+              setReaderOpen(false);
+              onNavigate("home");
+            }}
             savedIds={savedIds}
             onSave={handleSave}
             onShare={onShare}

@@ -3,7 +3,7 @@ import { TopBar } from "../components/layout/TopBar.jsx";
 import { BottomNav } from "../components/layout/BottomNav.jsx";
 import { SettingsRow } from "../components/ui/SettingsRow.jsx";
 
-export function ProfileScreen({ onNavigate, isSignedIn, onSignIn, onSignOut }) {
+export function ProfileScreen({ onNavigate, isSignedIn, user, onSignIn, onSignOut }) {
   if (!isSignedIn) {
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -26,14 +26,38 @@ export function ProfileScreen({ onNavigate, isSignedIn, onSignIn, onSignOut }) {
     { section: "ACCOUNT", items: [{ Icon: Ic.Help, label: "Help & support" }, { Icon: Ic.Logout, label: "Sign out", danger: true, action: onSignOut }] },
   ];
 
+  const username = user?.email?.split("@")[0] || "";
+  const initials =
+    username.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "U";
+
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <TopBar showProfile={false} />
       <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: "0.5px solid var(--border)", flexShrink: 0 }}>
-        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "var(--surface)", border: "0.5px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 500, color: "var(--ink)" }}>MS</div>
+      <div
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: "50%",
+          background: "var(--surface)",
+          border: "0.5px solid var(--border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 16,
+          fontWeight: 500,
+          color: "var(--ink)"
+        }}
+      >
+        {initials}
+      </div>
         <div>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--ink)", margin: 0 }}>Mahima Shah</p>
-          <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>mahima@taxchambers.in</p>
+        <p style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
+          {username || "LexLegis User"}
+        </p>
+          <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
+            {user?.email}
+          </p>
         </div>
         <button style={{ marginLeft: "auto", background: "none", border: "none", display: "flex" }}><Ic.Edit c="var(--muted)" s={18} /></button>
         <button onClick={() => onNavigate("admin")}>

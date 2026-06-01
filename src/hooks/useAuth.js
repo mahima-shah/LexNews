@@ -1,20 +1,39 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../services/supabase";
 
 export function useAuth() {
-  const [isSignedIn, setIsSignedIn] = useState(() => {
-    return localStorage.getItem("lexlegis_signed_in") === "true";
-  });
+  const [user, setUser] = useState(null);
+  const isSignedIn = !!user;
 
   useEffect(() => {
-    localStorage.setItem("lexlegis_signed_in", isSignedIn ? "true" : "false");
-  }, [isSignedIn]);
+    async function getSession() {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user ?? null);
+    }
 
-  const signIn = () => setIsSignedIn(true);
+    getSession();
 
-  const signOut = () => {
-    setIsSignedIn(false);
-    localStorage.removeItem("lexlegis_signed_in");
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const signIn = async (email) => {
+    return await supabase.auth.signInWithOtp({
+      email,
+    });
   };
 
-  return { isSignedIn, signIn, signOut };
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  return { user, isSignedIn, signIn, signOut };
 }

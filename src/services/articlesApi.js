@@ -4,7 +4,6 @@ export async function fetchArticles() {
   const { data, error } = await supabase
     .from('articles')
     .select('*')
-    .eq("status", "approved")
     .order('created_at', { ascending: false })
 
   if (error) {

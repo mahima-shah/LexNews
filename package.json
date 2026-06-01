@@ -13,6 +13,7 @@
     "@vitejs/plugin-react": "latest",
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
+    "fast-xml-parser": "^5.8.0",
     "react": "latest",
     "react-dom": "latest",
     "vite": "latest"

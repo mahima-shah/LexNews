@@ -14,11 +14,11 @@ export default function App() {
   const [screen, setScreen] = useState("home");
   const [miraOpen, setMiraOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
-  const { isSignedIn, signIn, signOut } = useAuth();
-  const { savedIds, toggleSave } = useSavedArticles();
+  const { user, isSignedIn, signIn, signOut } = useAuth();
+  const { savedIds, toggleSave } = useSavedArticles(isSignedIn);
   const [shareArticle, setShareArticle] = useState(null);
   console.log("shareArticle:", shareArticle);
-  
+
   const handleNavigate = (id) => {
     if (id === "mira") {
       setMiraOpen(true);
@@ -28,9 +28,9 @@ export default function App() {
   };
 
   const handleNeedSignIn = () => setShowSignIn(true);
-  const handleSignInSuccess = () => {
-    signIn();
-    setShowSignIn(false);
+  const handleSignInSuccess = async (email) => {
+    const result = await signIn(email);
+    return result;
   };
 
   return (
@@ -41,6 +41,7 @@ export default function App() {
           savedIds={savedIds}
           onSave={toggleSave}
           isSignedIn={isSignedIn}
+          user={user}
           onNeedSignIn={handleNeedSignIn}
           onShare={setShareArticle}
         />
@@ -66,6 +67,7 @@ export default function App() {
         <ProfileScreen
           onNavigate={handleNavigate}
           isSignedIn={isSignedIn}
+          user={user}
           onSignIn={() => setShowSignIn(true)}
           onSignOut={signOut}
         />

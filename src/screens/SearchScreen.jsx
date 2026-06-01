@@ -198,6 +198,10 @@ export function SearchScreen({ onNavigate }) {
             articles={results}
             startIndex={readerStart}
             onClose={() => setReaderOpen(false)}
+            onGoHome={() => {
+              setReaderOpen(false);
+              onNavigate("home");
+            }}
             savedIds={[]}
             onSave={() => {}}
           />
