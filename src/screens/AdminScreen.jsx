@@ -22,8 +22,8 @@ export function AdminScreen({ onNavigate }) {
     setMessage("Publishing...");
 
     const result = await createArticle({
-        ...form,
-        status: "approved",
+      ...form,
+      status: "approved",
     });
 
     if (!result.success) {

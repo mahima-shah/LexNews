@@ -46,13 +46,13 @@ export default function App() {
           onShare={setShareArticle}
         />
       )}
-  
+
       {screen === "search" && (
         <SearchScreen
           onNavigate={handleNavigate}
         />
       )}
-  
+
       {screen === "saved" && (
         <SavedScreen
           onNavigate={handleNavigate}
@@ -62,7 +62,7 @@ export default function App() {
           onNeedSignIn={handleNeedSignIn}
         />
       )}
-  
+
       {screen === "profile" && (
         <ProfileScreen
           onNavigate={handleNavigate}
@@ -72,25 +72,25 @@ export default function App() {
           onSignOut={signOut}
         />
       )}
-  
+
       {screen === "admin" && (
         <AdminScreen
           onNavigate={handleNavigate}
         />
       )}
-  
+
       <MiraPanel
         open={miraOpen}
         onClose={() => setMiraOpen(false)}
       />
-  
+
       {shareArticle && (
         <ShareSheet
           article={shareArticle}
           onClose={() => setShareArticle(null)}
         />
       )}
-  
+
       {showSignIn && (
         <SignInModal
           onSuccess={handleSignInSuccess}

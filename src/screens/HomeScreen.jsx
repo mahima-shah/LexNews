@@ -34,8 +34,8 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
     category === "all"
       ? articles
       : category === "fy"
-      ? articles
-      : articles.filter((article) => article.cat === category);
+        ? articles
+        : articles.filter((article) => article.cat === category);
 
   const openReader = (index) => {
     setReaderArticles(filtered);

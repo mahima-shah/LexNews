@@ -45,7 +45,53 @@ function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast }) {
           <Tag article={article} />
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--ink)", lineHeight: 1.3, marginTop: 10, marginBottom: 6 }}>{article.title}</h1>
           <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16 }}>{article.date} · {article.readTime}</p>
-          <p style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.75, whiteSpace: "pre-line", marginBottom: 24 }}>{article.body}</p>
+          {article.ai_summary && (
+            <div
+              style={{
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: 12,
+                padding: 14,
+                marginBottom: 20,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "var(--muted)",
+                  letterSpacing: 0.4,
+                  marginBottom: 8,
+                }}
+              >
+                LEXLEGIS SUMMARY
+              </p>
+
+              <p
+                style={{
+                  fontSize: 14,
+                  lineHeight: 1.7,
+                  color: "var(--ink)",
+                  whiteSpace: "pre-line",
+                  margin: 0,
+                }}
+              >
+                {article.ai_summary}
+              </p>
+            </div>
+          )}
+
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--ink-2)",
+              lineHeight: 1.75,
+              whiteSpace: "pre-line",
+              marginBottom: 24,
+            }}
+          >
+            {article.body}
+          </p>
           <div style={{ borderTop: "0.5px solid var(--border)", paddingTop: 16, marginBottom: 24 }}>
             <p style={{ fontSize: 10, color: "var(--muted)", fontWeight: 500, letterSpacing: 0.5, marginBottom: 10 }}>SOURCES ({article.sources.length})</p>
             {article.sources.map((source, index) => (

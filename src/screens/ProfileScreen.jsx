@@ -34,35 +34,35 @@ export function ProfileScreen({ onNavigate, isSignedIn, user, onSignIn, onSignOu
     <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <TopBar showProfile={false} />
       <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: "0.5px solid var(--border)", flexShrink: 0 }}>
-      <div
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: "50%",
-          background: "var(--surface)",
-          border: "0.5px solid var(--border)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 16,
-          fontWeight: 500,
-          color: "var(--ink)"
-        }}
-      >
-        {initials}
-      </div>
+        <div
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: "50%",
+            background: "var(--surface)",
+            border: "0.5px solid var(--border)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 16,
+            fontWeight: 500,
+            color: "var(--ink)"
+          }}
+        >
+          {initials}
+        </div>
         <div>
-        <p style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
-          {username || "LexLegis User"}
-        </p>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
+            {username || "LexLegis User"}
+          </p>
           <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
             {user?.email}
           </p>
         </div>
         <button style={{ marginLeft: "auto", background: "none", border: "none", display: "flex" }}><Ic.Edit c="var(--muted)" s={18} /></button>
         <button onClick={() => onNavigate("admin")}>
-  Open Admin
-</button>
+          Open Admin
+        </button>
       </div>
       <div style={{ display: "flex", borderBottom: "0.5px solid var(--border)", flexShrink: 0 }}>
         {[["24", "Saved"], ["148", "Read"], ["12", "Mira chats"]].map(([number, label], index) => (

@@ -123,5 +123,5 @@ A formal circular is expected to be released before June 30, 2026. Taxpayers wit
   },
 ];
 
-export const TAG_COLORS = { "tag-dt": ["#eeeeee","#222222"], "tag-it": ["#eeeeee","#222222"], "tag-cl": ["#eeeeee","#222222"], "tag-gl": ["#eeeeee","#222222"], "tag-fy": ["#eeeeee","#222222"] };
+export const TAG_COLORS = { "tag-dt": ["#eeeeee", "#222222"], "tag-it": ["#eeeeee", "#222222"], "tag-cl": ["#eeeeee", "#222222"], "tag-gl": ["#eeeeee", "#222222"], "tag-fy": ["#eeeeee", "#222222"] };
 

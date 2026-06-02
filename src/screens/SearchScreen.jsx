@@ -203,7 +203,7 @@ export function SearchScreen({ onNavigate }) {
               onNavigate("home");
             }}
             savedIds={[]}
-            onSave={() => {}}
+            onSave={() => { }}
           />
         )}
       </div>

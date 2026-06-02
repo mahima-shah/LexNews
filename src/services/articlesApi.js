@@ -30,15 +30,15 @@ export async function searchArticles(query) {
 }
 
 export async function createArticle(article) {
-    const { data, error } = await supabase
-      .from("articles")
-      .insert([article])
-      .select();
-  
-    if (error) {
-      console.error(error);
-      return { success: false, error };
-    }
-  
-    return { success: true, data };
+  const { data, error } = await supabase
+    .from("articles")
+    .insert([article])
+    .select();
+
+  if (error) {
+    console.error(error);
+    return { success: false, error };
   }
+
+  return { success: true, data };
+}
