@@ -17,7 +17,7 @@ async function generateSummary(article) {
     const prompt = `
   You are a legal news editor for LexLegis.
   
-  Summarize the following legal news article in approximately 200–300 words.
+  Summarize the following legal news article in approximately 100–200 words (a hard limit of 200).
   
   Focus on:
   - The core legal development or issue
@@ -51,10 +51,12 @@ async function generateSummary(article) {
 }
 
 const { data: articles, error } = await supabase
-    .from("articles")
-    .select("id, title, body, ai_summary")
-    .is("ai_summary", null)
-    .limit(3);
+  .from("articles")
+  .select("id, title, body, ai_summary")
+  .or("ai_summary.is.null,ai_summary.eq.")
+  .not("body", "is", null)
+  .order("created_at", { ascending: false })
+  .limit(10);
 
 if (error) {
     console.error("Fetch error:", error);
@@ -63,7 +65,21 @@ if (error) {
 
 console.log("ARTICLES TO SUMMARIZE:", articles.length);
 
+console.log(
+    "ARTICLES FOUND:",
+    articles.map((article) => ({
+      title: article.title,
+      bodyLength: article.body?.length || 0,
+      aiSummary: article.ai_summary,
+    }))
+  );
+
 for (const article of articles) {
+    if (!article.body || article.body.length < 300) {
+        console.log("Skipping short article body:", article.title);
+        continue;
+      }
+
     console.log("Summarizing:", article.title);
 
     try {
@@ -85,6 +101,10 @@ for (const article of articles) {
     } catch (error) {
         console.error("Summary failed:", article.title);
         console.error(error.message);
+        if (error.message.includes("Quota exceeded")) {
+            console.log("Gemini quota reached. Stopping script.");
+            break;
+          }
     }
 }
 

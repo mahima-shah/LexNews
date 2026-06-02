@@ -22,6 +22,36 @@ function createEventKey(title) {
         .join("-");
 }
 
+function categorizeArticle(title, body) {
+    const text = `${title} ${body}`.toLowerCase();
+  
+    if (
+      text.includes("income tax") ||
+      text.includes("cbdt") ||
+      text.includes("tds")
+    ) {
+      return "Direct Tax";
+    }
+  
+    if (
+      text.includes("gst") ||
+      text.includes("customs")
+    ) {
+      return "Indirect Tax";
+    }
+  
+    if (
+      text.includes("sebi") ||
+      text.includes("shares") ||
+      text.includes("merger") ||
+      text.includes("acquisition")
+    ) {
+      return "Corporate";
+    }
+  
+    return "General Law";
+  }
+
 async function extractArticleText(url) {
     console.log("Extracting:", url);
 
@@ -55,10 +85,17 @@ const parsed = parser.parse(xml);
 
 const items = parsed.rss?.channel?.item || [];
 
-const selectedItems = items.slice(0, 3);
+const since = Date.now() - 24 * 60 * 60 * 1000;
 
-// console.log(JSON.stringify(selectedItems[0], null, 2));
-// process.exit(0);
+const selectedItems = items.filter((item) => {
+  if (!item.pubDate) return false;
+
+  const publishedAt = new Date(item.pubDate).getTime();
+
+  return publishedAt >= since;
+});
+
+console.log("ITEMS IN LAST 24 HOURS:", selectedItems.length);
 
 const articles = [];
 
@@ -71,7 +108,7 @@ for (const item of selectedItems) {
             item.description?.replace(/<[^>]*>/g, "").slice(0, 180) ||
             "Latest legal news from LiveLaw.",
         body: articleText || item.description?.replace(/<[^>]*>/g, "") || item.title,
-        category: "General Law",
+        category: categorizeArticle(item.title, articleText),
         source_name: "LiveLaw",
         source_url: item.link,
         external_url: item.link,
