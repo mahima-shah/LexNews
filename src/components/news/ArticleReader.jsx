@@ -4,7 +4,7 @@ import { IconButton } from "../ui/IconButton.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
 import { Tag } from "./Tag.jsx";
 
-export function ArticleReader({ articles, startIndex, onClose, onGoHome, savedIds, onSave, onShare }) {
+export function ArticleReader({ articles, startIndex, onClose, onGoHome, onViewOlder, savedIds, onSave, onShare }) {
   const slidesRef = useRef(null);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export function ArticleReader({ articles, startIndex, onClose, onGoHome, savedId
       {articles.map((article, index) => (
         <ReaderSlide key={article.id} article={article} onClose={onClose} saved={savedIds.includes(article.id)} onSave={onSave} onShare={onShare} isLast={index === articles.length - 1} />
       ))}
-      <EndOfNewsSlide onClose={onGoHome || onClose} />
+      <EndOfNewsSlide onClose={onGoHome || onClose} onViewOlder={onViewOlder} />
     </div>
   );
 }
@@ -109,7 +109,7 @@ function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast }) {
   );
 }
 
-function EndOfNewsSlide({ onClose }) {
+function EndOfNewsSlide({ onClose, onViewOlder }) {
   return (
     <div
       className="reader-slide"
@@ -140,19 +140,39 @@ function EndOfNewsSlide({ onClose }) {
           marginBottom: 20,
         }}
       >
-        You’ve reached the end of this news feed.
+        You’ve reached the end of the latest news feed.
       </p>
+
+      {onViewOlder && (
+        <button
+          onClick={onViewOlder}
+          style={{
+            padding: "12px 22px",
+            background: "var(--ink)",
+            color: "#fff",
+            border: "none",
+            borderRadius: 12,
+            fontSize: 13,
+            fontWeight: 500,
+            marginBottom: 10,
+            width: "100%",
+          }}
+        >
+          View older news
+        </button>
+      )}
 
       <button
         onClick={onClose}
         style={{
           padding: "12px 22px",
-          background: "var(--ink)",
-          color: "#fff",
-          border: "none",
+          background: "var(--surface)",
+          color: "var(--ink)",
+          border: "0.5px solid var(--border)",
           borderRadius: 12,
           fontSize: 13,
           fontWeight: 500,
+          width: "100%",
         }}
       >
         Back to feed

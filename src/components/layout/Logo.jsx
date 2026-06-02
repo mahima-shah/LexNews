@@ -1,18 +1,18 @@
-import logoIcon from "../../assets/lexlegisicon.png";
+import lexlegisicon from "../../assets/lexlegisicon.png";
+import lexlegisdarkicon from "../../assets/lexlegisdarkicon.png";
 
-export function Logo() {
+export function Logo({ darkMode }) {
   return (
     <div className="topbar-logo">
       <img
-        src={logoIcon}
-        alt="LexLegis"
+        src={darkMode ? lexlegisdarkicon : lexlegisicon}
+        alt="Lexlegis.ai"
         style={{
-          width: 28,
-          height: 28,
+          height: 32,
+          width: "auto",
           objectFit: "contain",
         }}
       />
-      <span className="logo-wordmark">Lexlegis.ai</span>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { ArticleReader } from "../components/news/ArticleReader.jsx";
 import { Pill } from "../components/ui/Pill.jsx";
 import { formatArticle } from "../utils/formatArticle.js";
 
-export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onNeedSignIn, onShare }) {
+export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onNeedSignIn, onShare, onMore, onRead }) {
   const [category, setCategory] = useState("all");
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,10 +16,11 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
   const [readerOpen, setReaderOpen] = useState(false);
   const [readerArticles, setReaderArticles] = useState([]);
   const [readerStart, setReaderStart] = useState(0);
+  const [includeOlder, setIncludeOlder] = useState(false);
 
   useEffect(() => {
     async function loadArticles() {
-      const data = await fetchArticles();
+      const data = await fetchArticles({ includeOlder });
 
       const formattedArticles = data.map(formatArticle);
 
@@ -28,7 +29,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
     }
 
     loadArticles();
-  }, []);
+  }, [includeOlder]);
 
   const filtered =
     category === "all"
@@ -38,6 +39,8 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
         : articles.filter((article) => article.cat === category);
 
   const openReader = (index) => {
+    if (onRead) onRead(filtered[index].id);
+
     setReaderArticles(filtered);
     setReaderStart(index);
     setReaderOpen(true);
@@ -60,7 +63,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
     <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
       <TopBar isSignedIn={isSignedIn} onProfile={() => onNavigate("profile")} />
 
-      <div style={{ padding: "10px 0 0 16px", display: "flex", gap: 6, overflowX: "auto", flexShrink: 0 }}>
+      <div style={{ padding: "10px 0 10px", display: "flex", gap: 6, overflowX: "auto", flexShrink: 0 }}>
         {ARTICLE_FILTERS.map((filter) => (
           <Pill
             key={filter.cat}
@@ -88,6 +91,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
               saved={isSignedIn && savedIds.includes(article.id)}
               onSave={handleSave}
               onShare={onShare}
+              onMore={onMore}
             />
           ))
         )}
@@ -104,6 +108,10 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
             onGoHome={() => {
               setReaderOpen(false);
               onNavigate("home");
+            }}
+            onViewOlder={() => {
+              setReaderOpen(false);
+              setIncludeOlder(true);
             }}
             savedIds={savedIds}
             onSave={handleSave}

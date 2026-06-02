@@ -1,17 +1,26 @@
 import { supabase } from './supabase'
 
-export async function fetchArticles() {
-  const { data, error } = await supabase
-    .from('articles')
-    .select('*')
-    .order('created_at', { ascending: false })
+export async function fetchArticles({ includeOlder = false } = {}) {
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-  if (error) {
-    console.error(error)
-    return []
+  let query = supabase
+    .from("articles")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (!includeOlder) {
+    query = query.gte("created_at", twoDaysAgo.toISOString());
   }
 
-  return data
+  const { data, error } = await query;
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data;
 }
 
 export async function searchArticles(query) {

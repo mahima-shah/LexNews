@@ -9,13 +9,22 @@ import { useAuth } from "../hooks/useAuth.js";
 import { useSavedArticles } from "../hooks/useSavedArticles.js";
 import { AdminScreen } from "../screens/AdminScreen.jsx";
 import { ShareSheet } from "../components/ui/ShareSheet.jsx";
+import { MoreSheet } from "../components/ui/MoreSheet.jsx";
 
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [miraOpen, setMiraOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [moreArticle, setMoreArticle] = useState(null);
+  const [readIds, setReadIds] = useState(() => {
+    const saved = localStorage.getItem("lexlegis_read_articles");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [darkMode, setDarkMode] = useState(false);
+
   const { user, isSignedIn, signIn, signOut } = useAuth();
-  const { savedIds, toggleSave } = useSavedArticles(isSignedIn);
+  const { savedIds, toggleSave } = useSavedArticles();
   const [shareArticle, setShareArticle] = useState(null);
   console.log("shareArticle:", shareArticle);
 
@@ -33,8 +42,16 @@ export default function App() {
     return result;
   };
 
+  const markRead = (id) => {
+    setReadIds((current) => {
+      const updated = current.includes(id) ? current : [...current, id];
+      localStorage.setItem("lexlegis_read_articles", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <div className="app">
+    <div className={`app ${darkMode ? "dark" : ""}`}>
       {screen === "home" && (
         <HomeScreen
           onNavigate={handleNavigate}
@@ -43,7 +60,9 @@ export default function App() {
           isSignedIn={isSignedIn}
           user={user}
           onNeedSignIn={handleNeedSignIn}
+          onRead={markRead}
           onShare={setShareArticle}
+          onMore={setMoreArticle}
         />
       )}
 
@@ -68,6 +87,10 @@ export default function App() {
           onNavigate={handleNavigate}
           isSignedIn={isSignedIn}
           user={user}
+          darkMode={darkMode}
+          onToggleDarkMode={() => setDarkMode((value) => !value)}
+          readIds={readIds}
+          savedIds={savedIds}
           onSignIn={() => setShowSignIn(true)}
           onSignOut={signOut}
         />
@@ -88,6 +111,13 @@ export default function App() {
         <ShareSheet
           article={shareArticle}
           onClose={() => setShareArticle(null)}
+        />
+      )}
+
+      {moreArticle && (
+        <MoreSheet
+          article={moreArticle}
+          onClose={() => setMoreArticle(null)}
         />
       )}
 

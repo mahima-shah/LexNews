@@ -3,7 +3,7 @@ import { TopBar } from "../components/layout/TopBar.jsx";
 import { BottomNav } from "../components/layout/BottomNav.jsx";
 import { SettingsRow } from "../components/ui/SettingsRow.jsx";
 
-export function ProfileScreen({ onNavigate, isSignedIn, user, onSignIn, onSignOut }) {
+export function ProfileScreen({ onNavigate, isSignedIn, user, darkMode, onToggleDarkMode, readIds, savedIds, onSignIn, onSignOut }) {
   if (!isSignedIn) {
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -21,7 +21,14 @@ export function ProfileScreen({ onNavigate, isSignedIn, user, onSignIn, onSignOu
   }
 
   const groups = [
-    { section: "PREFERENCES", items: [{ Icon: Ic.Settings, label: "Feed preferences", note: "Direct Tax, Indirect Tax" }, { Icon: Ic.Bell, label: "Notifications" }, { Icon: Ic.Tag, label: "Manage topics" }] },
+    {
+      section: "PREFERENCES",
+      items: [
+        { Icon: Ic.Settings, label: "Feed preferences", note: "Direct Tax, Indirect Tax" },
+        { Icon: Ic.Bell, label: "Notifications" },
+        { Icon: Ic.Tag, label: "Manage topics" },
+      ]
+    },
     { section: "MIRA", items: [{ Icon: Ic.Mira, label: "Mira chat history" }] },
     { section: "ACCOUNT", items: [{ Icon: Ic.Help, label: "Help & support" }, { Icon: Ic.Logout, label: "Sign out", danger: true, action: onSignOut }] },
   ];
@@ -65,7 +72,11 @@ export function ProfileScreen({ onNavigate, isSignedIn, user, onSignIn, onSignOu
         </button>
       </div>
       <div style={{ display: "flex", borderBottom: "0.5px solid var(--border)", flexShrink: 0 }}>
-        {[["24", "Saved"], ["148", "Read"], ["12", "Mira chats"]].map(([number, label], index) => (
+        {[
+          [savedIds?.length || 0, "Saved"],
+          [readIds?.length || 0, "Read"],
+          [0, "Mira chats"],
+        ].map(([number, label], index) => (
           <div key={label} style={{ flex: 1, padding: "12px 0", textAlign: "center", borderRight: index < 2 ? "0.5px solid var(--border)" : "none" }}>
             <p style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: "var(--ink)", margin: 0 }}>{number}</p>
             <p style={{ fontSize: 10, color: "var(--muted)", margin: 0 }}>{label}</p>
@@ -75,8 +86,61 @@ export function ProfileScreen({ onNavigate, isSignedIn, user, onSignIn, onSignOu
       <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 80px" }}>
         {groups.map((group) => (
           <div key={group.section}>
-            <p style={{ fontSize: 10, color: "var(--muted)", padding: "14px 0 4px", fontWeight: 500, letterSpacing: 0.5 }}>{group.section}</p>
-            {group.items.map((item) => <SettingsRow key={item.label} {...item} onClick={item.action} />)}
+            <p style={{ fontSize: 10, color: "var(--muted)", padding: "14px 0 4px", fontWeight: 500, letterSpacing: 0.5 }}>
+              {group.section}
+            </p>
+
+            {group.items.map((item) => (
+              <SettingsRow key={item.label} {...item} onClick={item.action} />
+            ))}
+
+            {group.section === "PREFERENCES" && (
+              <div
+                onClick={onToggleDarkMode}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "13px 0",
+                  borderBottom: "0.5px solid var(--border)",
+                  cursor: "pointer",
+                }}
+              >
+                <Ic.Settings c="var(--muted)" s={22} />
+
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 14, color: "var(--ink)", margin: 0 }}>
+                    Dark mode
+                  </p>
+                  <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
+                    Switch app appearance
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    width: 42,
+                    height: 24,
+                    borderRadius: 999,
+                    background: darkMode ? "var(--ink)" : "var(--surface-2)",
+                    padding: 3,
+                    display: "flex",
+                    justifyContent: darkMode ? "flex-end" : "flex-start",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      background: darkMode ? "var(--white)" : "#fff",
+                      transition: "all 0.2s",
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

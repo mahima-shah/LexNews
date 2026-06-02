@@ -2,7 +2,7 @@ import { Ic } from "../../constants/icons.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
 import { Tag } from "./Tag.jsx";
 
-export function NewsCard({ article, onClick, saved, onSave, onShare }) {
+export function NewsCard({ article, onClick, saved, onSave, onShare, onMore }) {
   return (
     <div className="news-card" onClick={onClick}>
       <ArticleImage article={article} height={180} />
@@ -89,6 +89,10 @@ export function NewsCard({ article, onClick, saved, onSave, onShare }) {
         </button>
 
         <button
+          onClick={(event) => {
+            event.stopPropagation();
+            if (onMore) onMore(article);
+          }}
           style={{
             background: "none",
             border: "none",
