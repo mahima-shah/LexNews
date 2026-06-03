@@ -6,9 +6,9 @@ export function Logo({ darkMode }) {
     <div className="topbar-logo">
       <img
         src={darkMode ? lexlegisdarkicon : lexlegisicon}
-        alt="Lexlegis.ai"
+        alt="LexLegis"
         style={{
-          height: 32,
+          height: 30,
           width: "auto",
           objectFit: "contain",
         }}

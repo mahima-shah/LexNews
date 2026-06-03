@@ -16,7 +16,7 @@ export function BottomNav({ active, onNavigate }) {
         if (item.fab) {
           return (
             <button key={item.id} className="fab" onClick={() => onNavigate("mira")} aria-label="Ask Mira">
-              <Ic.Mira c="#fff" s={22} />
+              <Ic.Mira c="var(--white)" />
             </button>
           );
         }

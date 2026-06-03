@@ -1,10 +1,10 @@
 import { Ic } from "../../constants/icons.jsx";
 import { Logo } from "./Logo.jsx";
 
-export function TopBar({ onProfile, isSignedIn, showProfile = true }) {
+export function TopBar({ onProfile, isSignedIn, showProfile = true, darkMode }) {
   return (
     <div className="topbar">
-      <Logo />
+      <Logo darkMode={darkMode} />
       <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
         <Ic.Bell c="var(--muted)" s={20} />
         {showProfile && (

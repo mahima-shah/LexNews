@@ -63,6 +63,7 @@ export default function App() {
           onRead={markRead}
           onShare={setShareArticle}
           onMore={setMoreArticle}
+          darkMode={darkMode}
         />
       )}
 
@@ -79,6 +80,7 @@ export default function App() {
           onSave={toggleSave}
           isSignedIn={isSignedIn}
           onNeedSignIn={handleNeedSignIn}
+          darkMode={darkMode}
         />
       )}
 

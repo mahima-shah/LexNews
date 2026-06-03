@@ -24,6 +24,7 @@
   --surface: #1a1a1a;
   --surface-2: #222222;
   --white: #111111;
+  --danger: #ff6b6b;
 }
 
 .app.dark .bnav {
