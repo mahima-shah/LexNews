@@ -18,13 +18,22 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
   const [readerStart, setReaderStart] = useState(0);
   const [includeOlder, setIncludeOlder] = useState(false);
 
+  const [nextCursor, setNextCursor] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   useEffect(() => {
     async function loadArticles() {
-      const data = await fetchArticles({ includeOlder });
+      setLoading(true);
 
-      const formattedArticles = data.map(formatArticle);
+      const result = await fetchArticles({
+        includeOlder,
+        limit: 10,
+      });
 
-      setArticles(formattedArticles);
+      setArticles(result.articles.map(formatArticle));
+      setNextCursor(result.nextCursor);
+      setHasMore(!!result.nextCursor);
       setLoading(false);
     }
 
@@ -44,6 +53,29 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
     setReaderArticles(filtered);
     setReaderStart(index);
     setReaderOpen(true);
+  };
+
+  const loadMoreArticles = async () => {
+    if (!nextCursor || loadingMore) return [];
+  
+    console.log("Loading more articles...");
+  
+    setLoadingMore(true);
+  
+    const result = await fetchArticles({
+      includeOlder,
+      cursor: nextCursor,
+      limit: 10,
+    });
+  
+    const formattedNewArticles = result.articles.map(formatArticle);
+  
+    setArticles((current) => [...current, ...formattedNewArticles]);
+    setNextCursor(result.nextCursor);
+    setHasMore(!!result.nextCursor);
+    setLoadingMore(false);
+  
+    return formattedNewArticles;
   };
 
   const handleSave = (id) => {
@@ -79,7 +111,19 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
         ))}
       </div>
 
-      <div className="card-feed">
+      <div
+        className="card-feed"
+        onScroll={(event) => {
+          const element = event.currentTarget;
+
+          const nearBottom =
+            element.scrollTop + element.clientHeight >= element.scrollHeight - 200;
+
+          if (nearBottom && hasMore && !loadingMore) {
+            loadMoreArticles();
+          }
+        }}
+      >
         {filtered.length === 0 ? (
           <p style={{ padding: 16, color: "var(--muted)", fontSize: 13 }}>No articles found.</p>
         ) : (
@@ -95,6 +139,20 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
             />
           ))
         )}
+
+        {loadingMore && (
+          <p
+            style={{
+              textAlign: "center",
+              color: "var(--muted)",
+              fontSize: 12,
+              padding: 12,
+            }}
+          >
+            Loading more...
+          </p>
+        )}
+
       </div>
 
       <BottomNav active="home" onNavigate={onNavigate} />
@@ -116,6 +174,16 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
             savedIds={savedIds}
             onSave={handleSave}
             onShare={onShare}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            onLoadMore={async () => {
+              const newArticles = await loadMoreArticles();
+            
+              setReaderArticles((current) => [
+                ...current,
+                ...newArticles,
+              ]);
+            }}
           />
         )}
       </div>

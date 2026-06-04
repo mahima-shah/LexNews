@@ -1,26 +1,38 @@
 import { supabase } from './supabase'
 
-export async function fetchArticles({ includeOlder = false } = {}) {
+export async function fetchArticles({
+  includeOlder = false,
+  cursor = null,
+  limit = 10,
+} = {}) {
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
   let query = supabase
     .from("articles")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (!includeOlder) {
     query = query.gte("created_at", twoDaysAgo.toISOString());
+  }
+
+  if (cursor) {
+    query = query.lt("created_at", cursor);
   }
 
   const { data, error } = await query;
 
   if (error) {
     console.error(error);
-    return [];
+    return { articles: [], nextCursor: null };
   }
 
-  return data;
+  const nextCursor =
+    data.length === limit ? data[data.length - 1].created_at : null;
+
+  return { articles: data, nextCursor };
 }
 
 export async function searchArticles(query) {

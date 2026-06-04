@@ -10,6 +10,7 @@ import { useSavedArticles } from "../hooks/useSavedArticles.js";
 import { AdminScreen } from "../screens/AdminScreen.jsx";
 import { ShareSheet } from "../components/ui/ShareSheet.jsx";
 import { MoreSheet } from "../components/ui/MoreSheet.jsx";
+import { MediaTestScreen } from "../screens/MediaTestScreen.jsx";
 
 export default function App() {
   const [screen, setScreen] = useState("home");
@@ -102,6 +103,10 @@ export default function App() {
         <AdminScreen
           onNavigate={handleNavigate}
         />
+      )}
+
+      {screen === "media-test" && (
+        <MediaTestScreen />
       )}
 
       <MiraPanel

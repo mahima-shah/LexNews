@@ -4,7 +4,19 @@ import { IconButton } from "../ui/IconButton.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
 import { Tag } from "./Tag.jsx";
 
-export function ArticleReader({ articles, startIndex, onClose, onGoHome, onViewOlder, savedIds, onSave, onShare }) {
+export function ArticleReader({
+  articles,
+  startIndex,
+  onClose,
+  onGoHome,
+  onViewOlder,
+  savedIds,
+  onSave,
+  onShare,
+  hasMore,
+  loadingMore,
+  onLoadMore,
+}) {
   const slidesRef = useRef(null);
 
   useEffect(() => {
@@ -12,11 +24,33 @@ export function ArticleReader({ articles, startIndex, onClose, onGoHome, onViewO
   }, [startIndex]);
 
   return (
-    <div className="reader-slides" ref={slidesRef}>
+    <div
+      className="reader-slides"
+      ref={slidesRef}
+      onScroll={(event) => {
+        const element = event.currentTarget;
+
+        const nearBottom =
+          element.scrollTop + element.clientHeight >=
+          element.scrollHeight - 1200;
+
+        if (nearBottom && hasMore && !loadingMore && onLoadMore) {
+          onLoadMore();
+        }
+      }}
+    >
       {articles.map((article, index) => (
         <ReaderSlide key={article.id} article={article} onClose={onClose} saved={savedIds.includes(article.id)} onSave={onSave} onShare={onShare} isLast={index === articles.length - 1} />
       ))}
-      <EndOfNewsSlide onClose={onGoHome || onClose} onViewOlder={onViewOlder} />
+      {hasMore ? (
+        <div className="reader-slide" style={{ alignItems: "center", justifyContent: "center" }}>
+          <p style={{ fontSize: 13, color: "var(--muted)" }}>
+            {loadingMore ? "Loading more articles..." : "Swipe to load more..."}
+          </p>
+        </div>
+      ) : (
+        <EndOfNewsSlide onClose={onGoHome || onClose} onViewOlder={onViewOlder} />
+      )}
     </div>
   );
 }
