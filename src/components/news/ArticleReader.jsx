@@ -10,6 +10,7 @@ export function ArticleReader({
   onClose,
   onGoHome,
   onViewOlder,
+  canViewOlder,
   savedIds,
   onSave,
   onShare,
@@ -49,7 +50,10 @@ export function ArticleReader({
           </p>
         </div>
       ) : (
-        <EndOfNewsSlide onClose={onGoHome || onClose} onViewOlder={onViewOlder} />
+        <EndOfNewsSlide
+          onClose={onGoHome || onClose}
+          onViewOlder={canViewOlder ? onViewOlder : null}
+        />
       )}
     </div>
   );

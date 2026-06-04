@@ -21,6 +21,8 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
   const [nextCursor, setNextCursor] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [olderCursor, setOlderCursor] = useState(null);
+  const [olderMode, setOlderMode] = useState(false);
 
   useEffect(() => {
     async function loadArticles() {
@@ -57,25 +59,43 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
 
   const loadMoreArticles = async () => {
     if (!nextCursor || loadingMore) return [];
-  
+
     console.log("Loading more articles...");
-  
+
     setLoadingMore(true);
-  
+
     const result = await fetchArticles({
       includeOlder,
       cursor: nextCursor,
       limit: 10,
     });
-  
+
     const formattedNewArticles = result.articles.map(formatArticle);
-  
+
     setArticles((current) => [...current, ...formattedNewArticles]);
     setNextCursor(result.nextCursor);
     setHasMore(!!result.nextCursor);
     setLoadingMore(false);
-  
+
     return formattedNewArticles;
+  };
+
+  const loadOlderArticles = async () => {
+    const result = await fetchArticles({
+      olderOnly: true,
+      cursor: olderCursor,
+      limit: 10,
+    });
+
+    const formattedOlderArticles = result.articles.map(formatArticle);
+
+    setArticles((current) => [...current, ...formattedOlderArticles]);
+    setReaderArticles((current) => [...current, ...formattedOlderArticles]);
+
+    setOlderCursor(result.nextCursor);
+    setOlderMode(true);
+
+    return formattedOlderArticles;
   };
 
   const handleSave = (id) => {
@@ -167,9 +187,8 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
               setReaderOpen(false);
               onNavigate("home");
             }}
-            onViewOlder={() => {
-              setReaderOpen(false);
-              setIncludeOlder(true);
+            onViewOlder={async () => {
+              await loadOlderArticles();
             }}
             savedIds={savedIds}
             onSave={handleSave}
@@ -178,12 +197,13 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
             loadingMore={loadingMore}
             onLoadMore={async () => {
               const newArticles = await loadMoreArticles();
-            
+
               setReaderArticles((current) => [
                 ...current,
                 ...newArticles,
               ]);
             }}
+            canViewOlder={!olderMode}
           />
         )}
       </div>

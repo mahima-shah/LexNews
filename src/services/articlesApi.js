@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 
 export async function fetchArticles({
   includeOlder = false,
+  olderOnly = false,
   cursor = null,
   limit = 10,
 } = {}) {
@@ -14,7 +15,9 @@ export async function fetchArticles({
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (!includeOlder) {
+  if (olderOnly) {
+    query = query.lt("created_at", twoDaysAgo.toISOString());
+  } else if (!includeOlder) {
     query = query.gte("created_at", twoDaysAgo.toISOString());
   }
 

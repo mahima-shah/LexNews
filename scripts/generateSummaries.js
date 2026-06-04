@@ -17,7 +17,7 @@ async function generateSummary(article) {
     const prompt = `
   You are a legal news editor for LexLegis.
   
-  Summarize the following legal news article in approximately 100–200 words (a hard limit of 200).
+  Summarize the following legal news article in approximately 100–150 words (a hard limit of 150).
   
   Focus on:
   - The core legal development or issue
