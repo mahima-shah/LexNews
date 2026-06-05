@@ -18,6 +18,26 @@ export function SearchScreen({ onNavigate }) {
   const [readerOpen, setReaderOpen] = useState(false);
   const [readerStart, setReaderStart] = useState(0);
 
+  const highlight = (text, query) => {
+    if (!text || !query.trim()) return text;
+    const parts = text.split(new RegExp(`(${query})`, "gi"));
+    return parts.map((part, i) =>
+      part.toLowerCase() === query.toLowerCase()
+        ? <mark key={i} style={{ background: "yellow", color: "black", borderRadius: 2, padding: "0 2px" }}>{part}</mark>
+        : part
+    );
+  };
+
+  const getSnippet = (text, query) => {
+    if (!text || !query.trim()) return null;
+    const index = text.toLowerCase().indexOf(query.toLowerCase());
+    if (index === -1) return null;
+    const start = Math.max(0, index - 60);
+    const end = Math.min(text.length, index + query.length + 60);
+    const snippet = (start > 0 ? "..." : "") + text.slice(start, end) + (end < text.length ? "..." : "");
+    return snippet;
+  };
+
   const saveRecentSearch = (searchText) => {
     const clean = searchText.trim();
     if (!clean) return;
@@ -100,27 +120,38 @@ export function SearchScreen({ onNavigate }) {
               <p style={{ padding: "12px 16px", fontSize: 13, color: "var(--muted)" }}>No matching articles found.</p>
             ) : (
               <div style={{ padding: "0 16px" }}>
-                {results.map((article, index) => (
-                  <div
-                    key={article.id}
-                    onClick={() => openReader(index)}
-                    style={{
-                      padding: "12px 0",
-                      borderBottom: "0.5px solid var(--border)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <p style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>
-                      {article.category}
-                    </p>
-                    <p style={{ fontSize: 14, color: "var(--ink)", fontWeight: 500, lineHeight: 1.35 }}>
-                      {article.title}
-                    </p>
-                    <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, marginTop: 4 }}>
-                      {article.subtitle}
-                    </p>
-                  </div>
-                ))}
+                {results.map((article, index) => {
+                  const titleHasMatch = article.title?.toLowerCase().includes(query.toLowerCase());
+                  const subtitleHasMatch = article.subtitle?.toLowerCase().includes(query.toLowerCase());
+                  const bodySnippet = getSnippet(article.body, query);
+
+                  return (
+                    <div
+                      key={article.id}
+                      onClick={() => openReader(index)}
+                      style={{
+                        padding: "12px 0",
+                        borderBottom: "0.5px solid var(--border)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <p style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>
+                        {article.category}
+                      </p>
+                      <p style={{ fontSize: 14, color: "var(--ink)", fontWeight: 500, lineHeight: 1.35 }}>
+                        {highlight(article.title, query)}
+                      </p>
+                      <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, marginTop: 4 }}>
+                        {highlight(article.subtitle, query)}
+                      </p>
+                      {bodySnippet && !titleHasMatch && !subtitleHasMatch && (
+                        <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, marginTop: 4, fontStyle: "italic" }}>
+                          {highlight(bodySnippet, query)}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>
