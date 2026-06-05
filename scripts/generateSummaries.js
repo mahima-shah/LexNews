@@ -56,7 +56,7 @@ const { data: articles, error } = await supabase
   .or("ai_summary.is.null,ai_summary.eq.")
   .not("body", "is", null)
   .order("created_at", { ascending: false })
-  .limit(10);
+  .limit(3);
 
 if (error) {
     console.error("Fetch error:", error);

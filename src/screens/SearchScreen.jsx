@@ -45,8 +45,15 @@ export function SearchScreen({ onNavigate }) {
 
     async function runSearch() {
       setLoading(true);
-      const data = await searchArticles(query);
-      const formattedResults = data.map(formatArticle);
+    
+      const result = await searchArticles({
+        query,
+        cursor: null,
+        limit: 10,
+      });
+    
+      const formattedResults = result.articles.map(formatArticle);
+    
       setResults(formattedResults);
       setLoading(false);
     }

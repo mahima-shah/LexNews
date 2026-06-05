@@ -30,7 +30,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
 
       const result = await fetchArticles({
         includeOlder,
-        limit: 10,
+        limit: 3,
       });
 
       setArticles(result.articles.map(formatArticle));
@@ -58,31 +58,51 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
   };
 
   const loadMoreArticles = async () => {
-    if (!nextCursor || loadingMore) return [];
+    if (loadingMore) return [];
 
-    console.log("Loading more articles...");
+    const activeMode = olderMode ? "older" : "latest";
+    const activeCursor = olderMode ? olderCursor : nextCursor;
+
+    if (!activeCursor) return [];
+
+    console.log("LOAD MORE:", {
+      mode: activeMode,
+      cursor: activeCursor,
+      loadingMore,
+    });
 
     setLoadingMore(true);
 
     const result = await fetchArticles({
-      includeOlder,
-      cursor: nextCursor,
+      mode: activeMode,
+      cursor: activeCursor,
       limit: 10,
     });
 
     const formattedNewArticles = result.articles.map(formatArticle);
 
     setArticles((current) => [...current, ...formattedNewArticles]);
-    setNextCursor(result.nextCursor);
-    setHasMore(!!result.nextCursor);
+
+    if (olderMode) {
+      setOlderCursor(result.nextCursor);
+    } else {
+      setNextCursor(result.nextCursor);
+      setHasMore(!!result.nextCursor);
+    }
+
     setLoadingMore(false);
 
     return formattedNewArticles;
   };
 
   const loadOlderArticles = async () => {
+    console.log("LOAD OLDER:", { olderCursor, loadingMore });
+    if (loadingMore) return [];
+
+    setLoadingMore(true);
+
     const result = await fetchArticles({
-      olderOnly: true,
+      mode: "older",
       cursor: olderCursor,
       limit: 10,
     });
@@ -93,7 +113,14 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
     setReaderArticles((current) => [...current, ...formattedOlderArticles]);
 
     setOlderCursor(result.nextCursor);
+    setHasMore(!!result.nextCursor);
     setOlderMode(true);
+    setLoadingMore(false);
+
+    console.log("LOADED OLDER:", {
+      count: result.articles.length,
+      nextCursor: result.nextCursor,
+    });
 
     return formattedOlderArticles;
   };
@@ -171,6 +198,26 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
           >
             Loading more...
           </p>
+        )}
+
+        {!hasMore && !olderMode && (
+          <button
+            onClick={async () => {
+              console.log("VIEW OLDER POSTS CLICKED");
+              await loadOlderArticles();
+            }}
+            style={{
+              padding: "12px",
+              background: "var(--surface)",
+              border: "0.5px solid var(--border)",
+              borderRadius: 12,
+              fontSize: 13,
+              color: "var(--ink)",
+              fontWeight: 500,
+            }}
+          >
+            View older posts
+          </button>
         )}
 
       </div>
