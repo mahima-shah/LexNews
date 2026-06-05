@@ -32,12 +32,12 @@ export function ShareSheet({ article, onClose }) {
       borderRadius: 44,
     }}>
       <div style={{
-        background: "#fff",
+        background: "var(--white)",
         width: "100%",
         borderRadius: "24px 24px 44px 44px",
         padding: "20px",
       }}>
-        <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>Share article</p>
+        <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 6, color: "var(--ink)"}}>Share article</p>
         <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16 }}>
           {article.title}
         </p>
@@ -63,7 +63,7 @@ const buttonStyle = {
   padding: "13px 0",
   marginBottom: 8,
   background: "var(--ink)",
-  color: "#fff",
+  color: "var(--white)",
   border: "none",
   borderRadius: 12,
   fontSize: 14,
