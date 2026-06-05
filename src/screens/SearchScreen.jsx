@@ -72,7 +72,7 @@ export function SearchScreen({ onNavigate }) {
         limit: 10,
       });
     
-      const formattedResults = result.articles.map(formatArticle);
+      const formattedResults = (result.articles || []).map(formatArticle);
     
       setResults(formattedResults);
       setLoading(false);
