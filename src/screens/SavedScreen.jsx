@@ -6,7 +6,7 @@ import { BottomNav } from "../components/layout/BottomNav.jsx";
 import { ArticleReader } from "../components/news/ArticleReader.jsx";
 import { NewsCard } from "../components/news/NewsCard.jsx";
 import { Pill } from "../components/ui/Pill.jsx";
-import { fetchArticles } from "../services/articlesApi.js";
+import { fetchArticlesByIds } from "../services/articlesApi.js";
 import { formatArticle } from "../utils/formatArticle.js";
 
 export function SavedScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSignIn }) {
@@ -20,15 +20,18 @@ export function SavedScreen({ onNavigate, savedIds, onSave, isSignedIn, onNeedSi
 
   useEffect(() => {
     async function loadArticles() {
-      const data = await fetchArticles();
+      setLoading(true);
+  
+      const data = await fetchArticlesByIds(savedIds);
       const formattedArticles = data.map(formatArticle);
+  
       setArticles(formattedArticles);
       setLoading(false);
     }
-
+  
     loadArticles();
-  }, []);
-
+  }, [savedIds]);
+  
   const saved = articles.filter((article) => savedIds.includes(article.id));
   const filtered = category === "all" ? saved : saved.filter((article) => article.cat === category);
 

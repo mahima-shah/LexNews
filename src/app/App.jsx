@@ -27,6 +27,16 @@ export default function App() {
   const { user, isSignedIn, signIn, signOut } = useAuth();
   const { savedIds, toggleSave } = useSavedArticles();
   const [shareArticle, setShareArticle] = useState(null);
+
+  const [feedView, setFeedView] = useState(() => {
+    return localStorage.getItem("lexnews_feed_view") || "glance";
+  });
+
+  const updateFeedView = (view) => {
+    setFeedView(view);
+    localStorage.setItem("lexnews_feed_view", view);
+  };
+  
   console.log("shareArticle:", shareArticle);
 
   const handleNavigate = (id) => {
@@ -65,6 +75,7 @@ export default function App() {
           onShare={setShareArticle}
           onMore={setMoreArticle}
           darkMode={darkMode}
+          feedView={feedView}
         />
       )}
 
@@ -96,6 +107,8 @@ export default function App() {
           savedIds={savedIds}
           onSignIn={() => setShowSignIn(true)}
           onSignOut={signOut}
+          feedView={feedView}
+          onChangeFeedView={updateFeedView}
         />
       )}
 

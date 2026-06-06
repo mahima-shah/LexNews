@@ -3,7 +3,7 @@ import { TopBar } from "../components/layout/TopBar.jsx";
 import { BottomNav } from "../components/layout/BottomNav.jsx";
 import { SettingsRow } from "../components/ui/SettingsRow.jsx";
 
-export function ProfileScreen({ onNavigate, isSignedIn, user, darkMode, onToggleDarkMode, readIds, savedIds, onSignIn, onSignOut }) {
+export function ProfileScreen({ onNavigate, isSignedIn, user, darkMode, onToggleDarkMode, readIds, savedIds, onSignIn, onSignOut, feedView, onChangeFeedView }) {
   if (!isSignedIn) {
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -95,51 +95,103 @@ export function ProfileScreen({ onNavigate, isSignedIn, user, darkMode, onToggle
             ))}
 
             {group.section === "PREFERENCES" && (
-              <div
-                onClick={onToggleDarkMode}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "13px 0",
-                  borderBottom: "0.5px solid var(--border)",
-                  cursor: "pointer",
-                }}
-              >
-                <Ic.Settings c="var(--muted)" s={22} />
-
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 14, color: "var(--ink)", margin: 0 }}>
-                    Dark mode
-                  </p>
-                  <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
-                    Switch app appearance
-                  </p>
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    padding: "12px 0",
+                    borderBottom: "0.5px solid var(--border)",
+                  }}
+                >
+                  {[
+                    ["glance", "Glance"],
+                    ["reader", "Reader"],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      onClick={() => onChangeFeedView(value)}
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        borderRadius: 12,
+                        border: "0.5px solid var(--border)",
+                        background:
+                          feedView === value
+                            ? "var(--ink)"
+                            : "var(--surface)",
+                        color:
+                          feedView === value
+                            ? "var(--white)"
+                            : "var(--ink)",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
 
                 <div
+                  onClick={onToggleDarkMode}
                   style={{
-                    width: 42,
-                    height: 24,
-                    borderRadius: 999,
-                    background: darkMode ? "var(--ink)" : "var(--surface-2)",
-                    padding: 3,
                     display: "flex",
-                    justifyContent: darkMode ? "flex-end" : "flex-start",
-                    transition: "all 0.2s",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "13px 0",
+                    borderBottom: "0.5px solid var(--border)",
+                    cursor: "pointer",
                   }}
                 >
+                  <Ic.Settings c="var(--muted)" s={22} />
+
+                  <div style={{ flex: 1 }}>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        color: "var(--ink)",
+                        margin: 0,
+                      }}
+                    >
+                      Dark mode
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        color: "var(--muted)",
+                        margin: 0,
+                      }}
+                    >
+                      Switch app appearance
+                    </p>
+                  </div>
+
                   <div
                     style={{
-                      width: 18,
-                      height: 18,
-                      borderRadius: "50%",
-                      background: darkMode ? "var(--white)" : "#fff",
+                      width: 42,
+                      height: 24,
+                      borderRadius: 999,
+                      background: darkMode ? "var(--ink)" : "var(--surface-2)",
+                      padding: 3,
+                      display: "flex",
+                      justifyContent: darkMode ? "flex-end" : "flex-start",
                       transition: "all 0.2s",
                     }}
-                  />
+                  >
+                    <div
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        background: darkMode ? "var(--white)" : "#fff",
+                        transition: "all 0.2s",
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
         ))}

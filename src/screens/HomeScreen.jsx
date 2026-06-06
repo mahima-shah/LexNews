@@ -8,7 +8,7 @@ import { ArticleReader } from "../components/news/ArticleReader.jsx";
 import { Pill } from "../components/ui/Pill.jsx";
 import { formatArticle } from "../utils/formatArticle.js";
 
-export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onNeedSignIn, onShare, onMore, onRead }) {
+export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onNeedSignIn, onShare, onMore, onRead, feedView }) {
   const [category, setCategory] = useState("all");
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
 
       setOlderMode(false);
       setOlderCursor(null);
-      setNextCursor(null);  
+      setNextCursor(null);
 
       const result = await fetchArticles({
         includeOlder,
@@ -165,69 +165,96 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
         ))}
       </div>
 
-      <div
-        className="card-feed"
-        onScroll={(event) => {
-          const element = event.currentTarget;
-
-          const nearBottom =
-            element.scrollTop + element.clientHeight >= element.scrollHeight - 200;
-
-          if (nearBottom && hasMore && !loadingMore) {
-            loadMoreArticles();
-          }
-        }}
-      >
-        {filtered.length === 0 ? (
-          <p style={{ padding: 16, color: "var(--muted)", fontSize: 13 }}>No articles found.</p>
-        ) : (
-          filtered.map((article, index) => (
-            <NewsCard
-              key={article.id}
-              article={article}
-              onClick={() => openReader(index)}
-              saved={isSignedIn && savedIds.includes(article.id)}
-              onSave={handleSave}
-              onShare={onShare}
-              onMore={onMore}
-            />
-          ))
-        )}
-
-        {loadingMore && (
-          <p
-            style={{
-              textAlign: "center",
-              color: "var(--muted)",
-              fontSize: 12,
-              padding: 12,
+      {feedView === "reader" ? (
+        <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+          <ArticleReader
+            articles={filtered}
+            startIndex={0}
+            onClose={() => { 
+              setCategory("all");
             }}
-          >
-            Loading more...
-          </p>
-        )}
-
-        {!hasMore && !olderMode && (
-          <button
-            onClick={async () => {
-              console.log("VIEW OLDER POSTS CLICKED");
+            onGoHome={() => {
+              setCategory("all");
+            }}
+            onViewOlder={async () => {
               await loadOlderArticles();
             }}
-            style={{
-              padding: "12px",
-              background: "var(--surface)",
-              border: "0.5px solid var(--border)",
-              borderRadius: 12,
-              fontSize: 13,
-              color: "var(--ink)",
-              fontWeight: 500,
-            }}
-          >
-            View older posts
-          </button>
-        )}
+            savedIds={savedIds}
+            onSave={handleSave}
+            onShare={onShare}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            onLoadMore={loadMoreArticles}
+            canViewOlder={!olderMode}
+            embedded={true}
+          />
+        </div>
+      ) : (
+        <div
+          className="card-feed"
+          onScroll={(event) => {
+            const element = event.currentTarget;
 
-      </div>
+            const nearBottom =
+              element.scrollTop + element.clientHeight >= element.scrollHeight - 200;
+
+            if (nearBottom && hasMore && !loadingMore) {
+              loadMoreArticles();
+            }
+          }}
+        >
+          {filtered.length === 0 ? (
+            <p style={{ padding: 16, color: "var(--muted)", fontSize: 13 }}>
+              No articles found.
+            </p>
+          ) : (
+            filtered.map((article, index) => (
+              <NewsCard
+                key={article.id}
+                article={article}
+                onClick={() => openReader(index)}
+                saved={isSignedIn && savedIds.includes(article.id)}
+                onSave={handleSave}
+                onShare={onShare}
+                onMore={onMore}
+              />
+            ))
+          )}
+
+          {loadingMore && (
+            <p
+              style={{
+                textAlign: "center",
+                color: "var(--muted)",
+                fontSize: 12,
+                padding: 12,
+              }}
+            >
+              Loading more...
+            </p>
+          )}
+
+          {!hasMore && !olderMode && (
+            <button
+              onClick={async () => {
+                console.log("VIEW OLDER POSTS CLICKED");
+                await loadOlderArticles();
+              }}
+              style={{
+                padding: "12px",
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: 12,
+                fontSize: 13,
+                color: "var(--ink)",
+                fontWeight: 500,
+              }}
+            >
+              View older posts
+            </button>
+          )}
+        </div>
+      )}
 
       <BottomNav active="home" onNavigate={onNavigate} />
 
