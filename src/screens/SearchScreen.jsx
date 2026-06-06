@@ -18,6 +18,9 @@ export function SearchScreen({ onNavigate }) {
   const [readerOpen, setReaderOpen] = useState(false);
   const [readerStart, setReaderStart] = useState(0);
 
+  const [nextCursor, setNextCursor] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const highlight = (text, query) => {
     if (!text || !query.trim()) return text;
     const parts = text.split(new RegExp(`(${query})`, "gi"));
@@ -57,6 +60,29 @@ export function SearchScreen({ onNavigate }) {
     saveRecentSearch(query);
   };
 
+  const loadMoreSearchResults = async () => {
+    if (!nextCursor || loadingMore || !query.trim()) return;
+
+    console.log("LOAD MORE SEARCH:", {
+      query,
+      cursor: nextCursor,
+    });
+
+    setLoadingMore(true);
+
+    const result = await searchArticles({
+      query,
+      cursor: nextCursor,
+      limit: 10,
+    });
+
+    const formattedResults = (result.articles || []).map(formatArticle);
+
+    setResults((current) => [...current, ...formattedResults]);
+    setNextCursor(result.nextCursor);
+    setLoadingMore(false);
+  };
+
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
@@ -70,13 +96,21 @@ export function SearchScreen({ onNavigate }) {
         cursor: null,
         limit: 10,
       });
-      
+
+      console.log("SEARCH RESULT:", {
+        query,
+        count: result.articles?.length || 0,
+        nextCursor: result.nextCursor,
+      });
+
       const formattedResults = (result.articles || []).map(formatArticle);
       setResults(formattedResults);
+      setNextCursor(result.nextCursor);
       setLoading(false);
     }
 
     const timer = setTimeout(runSearch, 300);
+
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -105,7 +139,20 @@ export function SearchScreen({ onNavigate }) {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 0 80px" }}>
+      <div
+        style={{ flex: 1, overflowY: "auto", padding: "0 0 80px" }}
+        onScroll={(event) => {
+          const element = event.currentTarget;
+
+          const nearBottom =
+            element.scrollTop + element.clientHeight >=
+            element.scrollHeight - 200;
+
+          if (nearBottom && nextCursor && !loadingMore && query.trim()) {
+            loadMoreSearchResults();
+          }
+        }}
+      >
         {query.trim() ? (
           <>
             <p style={{ fontSize: 10, color: "var(--muted)", padding: "14px 16px 6px", fontWeight: 500, letterSpacing: 0.5 }}>
@@ -150,6 +197,12 @@ export function SearchScreen({ onNavigate }) {
                     </div>
                   );
                 })}
+
+                {loadingMore && (
+                  <p style={{ padding: "12px 16px", fontSize: 12, color: "var(--muted)", textAlign: "center" }}>
+                    Loading more results...
+                  </p>
+                )}
               </div>
             )}
           </>

@@ -28,9 +28,14 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
     async function loadArticles() {
       setLoading(true);
 
+      setOlderMode(false);
+      setOlderCursor(null);
+      setNextCursor(null);  
+
       const result = await fetchArticles({
         includeOlder,
         limit: 3,
+        category,
       });
 
       setArticles(result.articles.map(formatArticle));
@@ -40,7 +45,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
     }
 
     loadArticles();
-  }, [includeOlder]);
+  }, [includeOlder, category]);
 
   const filtered =
     category === "all"
@@ -77,6 +82,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
       mode: activeMode,
       cursor: activeCursor,
       limit: 10,
+      category,
     });
 
     const formattedNewArticles = result.articles.map(formatArticle);
@@ -105,6 +111,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
       mode: "older",
       cursor: olderCursor,
       limit: 10,
+      category,
     });
 
     const formattedOlderArticles = result.articles.map(formatArticle);

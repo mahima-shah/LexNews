@@ -21,7 +21,8 @@ export function ArticleReader({
   const slidesRef = useRef(null);
 
   useEffect(() => {
-    if (slidesRef.current) slidesRef.current.scrollTop = startIndex * 844;
+    if (slidesRef.current) slidesRef.current.scrollTop =
+  startIndex * slidesRef.current.clientHeight;
   }, [startIndex]);
 
   return (

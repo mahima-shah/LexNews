@@ -4,6 +4,7 @@ export async function fetchArticles({
   mode = "latest",
   cursor = null,
   limit = 10,
+  category = "all",
 } = {}) {
 
   const threeDaysAgo = new Date();
@@ -32,6 +33,17 @@ export async function fetchArticles({
       .gte("created_at", thirtyDaysAgo.toISOString());
   }
 
+  const categoryMap = {
+    dt: "Direct Tax",
+    it: "Indirect Tax",
+    cl: "Corporate",
+    gl: "General Law",
+  };
+
+  if (category !== "all" && category !== "fy") {
+    query = query.eq("category", categoryMap[category]);
+  }
+
   if (cursor) {
     query = query.or(
       `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
@@ -42,6 +54,7 @@ export async function fetchArticles({
     mode,
     cursor,
     limit,
+    category,
   });
 
   const { data, error } = await query;
