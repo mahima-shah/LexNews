@@ -135,3 +135,20 @@ export async function createArticle(article) {
 
   return { success: true, data };
 }
+
+export async function fetchArticlesByIds(ids = []) {
+  if (!ids.length) return [];
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .in("id", ids)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data;
+}
