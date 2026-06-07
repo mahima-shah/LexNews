@@ -3,13 +3,10 @@ export function formatArticle(article) {
     ...article,
 
     cat:
-      article.category === "Direct Tax"
-        ? "dt"
-        : article.category === "Indirect Tax"
-          ? "it"
-          : article.category === "Corporate"
-            ? "cl"
-            : "gl",
+      article.category === "Direct Tax" ? "dt"
+      : article.category === "Indirect Tax" ? "it"
+      : article.category === "Corporate" ? "cl"
+      : "gl",
 
     tag: article.category,
     tagStyle: "tag-gl",
