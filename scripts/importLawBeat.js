@@ -1,4 +1,4 @@
-console.log("SCRIPT STARTED");
+console.log("SCRIPT STARTED - LawBeat");
 
 import "dotenv/config";
 import { XMLParser } from "fast-xml-parser";
@@ -10,7 +10,7 @@ const supabase = createClient(
   process.env.VITE_SUPABASE_ANON_KEY
 );
 
-const FEED_URL = "https://www.barandbench.com/feed";
+const FEED_URL = "https://lawbeat.in/feed";
 
 function createEventKey(title) {
   return title
@@ -45,14 +45,19 @@ function categorizeArticle(title, body) {
 
 async function extractArticleText(url) {
   console.log("Extracting:", url);
-  const response = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
-  const html = await response.text();
-  const $ = cheerio.load(html);
-  return $("p").map((_, el) => $(el).text().trim()).get().filter((p) => p.length > 40).join("\n\n");
+  try {
+    const response = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    return $("p").map((_, el) => $(el).text().trim()).get().filter((p) => p.length > 40).join("\n\n");
+  } catch (e) {
+    console.log("Extract failed:", e.message);
+    return "";
+  }
 }
 
 console.log("FETCHING RSS...");
-const response = await fetch(FEED_URL);
+const response = await fetch(FEED_URL, { headers: { "User-Agent": "Mozilla/5.0" } });
 const xml = await response.text();
 const parser = new XMLParser({ ignoreAttributes: false });
 const parsed = parser.parse(xml);
@@ -68,15 +73,15 @@ for (const item of selectedItems) {
   const articleText = await extractArticleText(item.link);
   articles.push({
     title: item.title,
-    subtitle: item.description?.replace(/<[^>]*>/g, "").slice(0, 180) || "Latest legal news from Bar & Bench.",
+    subtitle: item.description?.replace(/<[^>]*>/g, "").slice(0, 180) || "Latest legal news from LawBeat.",
     body: articleText || item.description?.replace(/<[^>]*>/g, "") || item.title,
     category: categorizeArticle(item.title, articleText),
-    source_name: "Bar & Bench",
+    source_name: "LawBeat",
     source_url: item.link,
     external_url: item.link,
     event_key: createEventKey(item.title),
     status: "pending",
-    image_url: item["media:content"]?.["@_url"] || null,
+    image_url: item["media:content"]?.["@_url"] || item.enclosure?.["@_url"] || null,
   });
 }
 

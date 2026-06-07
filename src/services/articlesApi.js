@@ -4,14 +4,10 @@ export async function fetchArticles({
   mode = "latest",
   cursor = null,
   limit = 10,
-  category = "all",
 } = {}) {
 
   const threeDaysAgo = new Date();
   threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -19,6 +15,7 @@ export async function fetchArticles({
   let query = supabase
     .from("articles")
     .select("*")
+    .eq("status", "approved")
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .limit(limit);
@@ -33,29 +30,11 @@ export async function fetchArticles({
       .gte("created_at", thirtyDaysAgo.toISOString());
   }
 
-  const categoryMap = {
-    dt: "Direct Tax",
-    it: "Indirect Tax",
-    cl: "Corporate",
-    gl: "General Law",
-  };
-
-  if (category !== "all" && category !== "fy") {
-    query = query.eq("category", categoryMap[category]);
-  }
-
   if (cursor) {
     query = query.or(
       `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
     );
   }
-
-  console.log("FETCH ARTICLES:", {
-    mode,
-    cursor,
-    limit,
-    category,
-  });
 
   const { data, error } = await query;
 
@@ -64,28 +43,33 @@ export async function fetchArticles({
     return { articles: [], nextCursor: null };
   }
 
-  console.log("FETCH RESULT:", {
-    mode,
-    count: data.length,
-    nextCursor:
-      data.length === limit
-        ? {
-          created_at: data[data.length - 1].created_at,
-          id: data[data.length - 1].id,
-        }
-        : null,
-  });
-
   return {
     articles: data,
     nextCursor:
       data.length === limit
         ? {
-          created_at: data[data.length - 1].created_at,
-          id: data[data.length - 1].id,
-        }
+            created_at: data[data.length - 1].created_at,
+            id: data[data.length - 1].id,
+          }
         : null,
   };
+}
+
+export async function fetchArticlesByIds(ids) {
+  if (!ids || ids.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .in("id", ids)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data;
 }
 
 export async function searchArticles({
@@ -100,6 +84,7 @@ export async function searchArticles({
   let request = supabase
     .from("articles")
     .select("*")
+    .eq("status", "approved")
     .or(`title.ilike.%${query}%,subtitle.ilike.%${query}%,body.ilike.%${query}%`)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -122,6 +107,49 @@ export async function searchArticles({
   };
 }
 
+export async function fetchPendingArticles() {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function approveArticle(id) {
+  const { error } = await supabase
+    .from("articles")
+    .update({ status: "approved" })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    return { success: false };
+  }
+
+  return { success: true };
+}
+
+export async function rejectArticle(id) {
+  const { error } = await supabase
+    .from("articles")
+    .update({ status: "rejected" })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    return { success: false };
+  }
+
+  return { success: true };
+}
+
 export async function createArticle(article) {
   const { data, error } = await supabase
     .from("articles")
@@ -134,21 +162,4 @@ export async function createArticle(article) {
   }
 
   return { success: true, data };
-}
-
-export async function fetchArticlesByIds(ids = []) {
-  if (!ids.length) return [];
-
-  const { data, error } = await supabase
-    .from("articles")
-    .select("*")
-    .in("id", ids)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error(error);
-    return [];
-  }
-
-  return data;
 }
