@@ -15,13 +15,22 @@ export function BottomNav({ active, onNavigate }) {
         const isActive = active === item.id;
         if (item.fab) {
           return (
-            <button key={item.id} className="fab" onClick={() => onNavigate("mira")} aria-label="Ask Mira">
+            <button
+              key={item.id}
+              className="fab"
+              onClick={() => onNavigate("mira")}
+              aria-label="Ask Mira"
+            >
               <Ic.Mira c="var(--white)" />
             </button>
           );
         }
         return (
-          <button key={item.id} className="bnav-item" onClick={() => onNavigate(item.id)}>
+          <button
+            key={item.id}
+            className="bnav-item"
+            onClick={() => onNavigate(item.id)}
+          >
             <item.Icon c={isActive ? "var(--ink)" : "var(--muted-2)"} s={22} />
             <span className={`bnav-label ${isActive ? "on" : ""}`}>{item.label}</span>
           </button>

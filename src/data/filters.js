@@ -1,10 +1,15 @@
 export const ARTICLE_FILTERS = [
-  { label: "For you", cat: "fy" },
   { label: "All", cat: "all" },
   { label: "Direct Tax", cat: "dt" },
   { label: "Indirect Tax", cat: "it" },
   { label: "Corporate", cat: "cl" },
   { label: "General Law", cat: "gl" },
+];
+
+export const COURT_FILTERS = [
+  { label: "All Courts", court: "all" },
+  { label: "Supreme Court", court: "sc" },
+  { label: "High Court", court: "hc" },
 ];
 
 export const SAVED_FILTERS = ARTICLE_FILTERS.filter((filter) => filter.cat !== "fy");

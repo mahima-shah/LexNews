@@ -115,7 +115,15 @@ function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast }) {
                   margin: 0,
                 }}
               >
-                {article.ai_summary}
+                {(() => {
+                const words = article.ai_summary.split(/\s+/);
+                if (words.length <= 60) return article.ai_summary;
+                const truncated = words.slice(0, 60).join(" ");
+                const lastSentence = truncated.search(/[.!?][^.!?]*$/);
+                return lastSentence !== -1
+                  ? truncated.slice(0, lastSentence + 1)
+                  : truncated + "…";
+              })()}
               </p>
             </div>
           ) : (

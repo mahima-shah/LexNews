@@ -4,7 +4,15 @@ export async function fetchArticles({
   mode = "latest",
   cursor = null,
   limit = 10,
+  category = null,
 } = {}) {
+
+  const CAT_MAP = {
+    dt: "Direct Tax",
+    it: "Indirect Tax",
+    cl: "Corporate",
+    gl: "General Law",
+  };
 
   const threeDaysAgo = new Date();
   threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
@@ -19,6 +27,12 @@ export async function fetchArticles({
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .limit(limit);
+
+  // Apply category filter if a specific category is selected
+  if (category && category !== "all") {
+    const dbCategory = CAT_MAP[category];
+    if (dbCategory) query = query.eq("category", dbCategory);
+  }
 
   if (mode === "latest") {
     query = query.gte("created_at", threeDaysAgo.toISOString());
