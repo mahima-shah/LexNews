@@ -20,6 +20,11 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
   --shadow-lg: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08);
+  /* Safe area insets for notch/home bar */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 .app.dark {
@@ -45,12 +50,22 @@
   border-color: var(--white);
 }
 
+html {
+  height: 100%;
+  /* Prevent font size inflation on orientation change */
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
+  height: 100%;
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  background: #e9e9e9;
+  min-height: -webkit-fill-available;
   font-family: var(--font-body);
+  background: #e9e9e9;
+  /* Center on desktop, fill on mobile */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button, input { font-family: inherit; }
@@ -61,26 +76,52 @@ button { cursor: pointer; }
 .app {
   color: var(--ink);
   background: var(--white);
-  width: min(100vw, 430px);
-  height: min(100vh, 932px);
+  /* Full width/height on real mobile, capped on desktop */
+  width: 100vw;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh; /* dynamic viewport height — accounts for browser chrome on mobile */
+  max-height: 932px;
   overflow: hidden;
   position: relative;
-  border-radius: clamp(0px, 5vw, 44px);
-  border: 1px solid rgba(0,0,0,0.14);
-  box-shadow: 0 24px 80px rgba(0,0,0,0.14);
+  /* No border-radius on small screens, rounded on desktop */
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* Desktop: show as phone frame */
+@media (min-width: 431px) {
+  .app {
+    border-radius: 44px;
+    border: 1px solid rgba(0,0,0,0.14);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.14);
+  }
 }
 
 /* TopBar */
 .topbar {
-  height: 56px;
-  padding: 0 16px;
+  height: calc(56px + var(--safe-top));
+  padding: var(--safe-top) 16px 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  padding-bottom: 0;
   justify-content: space-between;
   flex-shrink: 0;
   background: var(--white);
   border-bottom: 0.5px solid var(--border);
+  /* inner content needs fixed height */
+  min-height: calc(56px + var(--safe-top));
 }
+
+/* inner row inside topbar */
+.topbar > * {
+  margin-bottom: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+}
+
 .topbar-logo { display: flex; align-items: center; gap: 7px; }
 .logo-box {
   width: 28px;
@@ -104,7 +145,9 @@ button { cursor: pointer; }
 .bnav {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 72px;
+  /* Extra height for home indicator on iPhone */
+  height: calc(72px + var(--safe-bottom));
+  padding-bottom: calc(10px + var(--safe-bottom));
   width: 100%;
   background: rgba(255,255,255,0.96);
   backdrop-filter: blur(16px);
@@ -114,9 +157,15 @@ button { cursor: pointer; }
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
-  padding: 0 8px 10px;
-  border-radius: 0 0 clamp(0px, 5vw, 44px) clamp(0px, 5vw, 44px);
+  padding-left: 8px;
+  padding-right: 8px;
   z-index: 50;
+}
+
+@media (min-width: 431px) {
+  .bnav {
+    border-radius: 0 0 44px 44px;
+  }
 }
 
 .bnav-item {
@@ -239,7 +288,9 @@ button { cursor: pointer; }
 /* Reader */
 .reader-wrap {
   position: absolute;
-  top: 56px; left: 0; right: 0; bottom: 72px;
+  top: calc(56px + var(--safe-top));
+  left: 0; right: 0;
+  bottom: calc(72px + var(--safe-bottom));
   z-index: 40;
   background: var(--white);
   transform: translateY(100%);
@@ -297,11 +348,13 @@ button { cursor: pointer; }
   z-index: 100;
   display: flex;
   flex-direction: column;
-  border-radius: 28px 28px 44px 44px;
+  border-radius: 28px 28px 0 0;
   transform: translateY(105%);
   transition: transform var(--transition-slow);
   border-top: 0.5px solid var(--border);
   box-shadow: 0 -18px 50px rgba(0,0,0,0.14);
+  /* Mira sheet also needs bottom safe area padding */
+  padding-bottom: var(--safe-bottom);
 }
 .mira-sheet.open { transform: translateY(0); }
 .mira-grabber {
