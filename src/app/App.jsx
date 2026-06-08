@@ -36,8 +36,6 @@ export default function App() {
     setFeedView(view);
     localStorage.setItem("lexnews_feed_view", view);
   };
-  
-  console.log("shareArticle:", shareArticle);
 
   const handleNavigate = (id) => {
     if (id === "mira") {
@@ -76,6 +74,7 @@ export default function App() {
           onMore={setMoreArticle}
           darkMode={darkMode}
           feedView={feedView}
+          onChangeFeedView={updateFeedView}
         />
       )}
 
@@ -93,6 +92,7 @@ export default function App() {
           isSignedIn={isSignedIn}
           onNeedSignIn={handleNeedSignIn}
           darkMode={darkMode}
+          user={user}
         />
       )}
 
