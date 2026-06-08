@@ -1,9 +1,55 @@
+import { useState } from "react";
 import { Ic } from "../constants/icons.jsx";
 import { TopBar } from "../components/layout/TopBar.jsx";
 import { BottomNav } from "../components/layout/BottomNav.jsx";
 import { SettingsRow } from "../components/ui/SettingsRow.jsx";
+import { ARTICLES } from "../data/articles.js";
+
+const LAW_CATS = ["Direct Tax", "Indirect Tax", "Corporate", "General Law"];
+const COURTS = ["Supreme Court", "High Court"];
+const NEWS_SOURCES = [...new Set(ARTICLES.flatMap((a) => a.sources.map((s) => s.name)))].sort();
+
+function PillGroup({ title, options, selected, onToggle }) {
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <p style={{ fontSize: 10, color: "var(--muted)", fontWeight: 600, letterSpacing: 0.5, marginBottom: 8 }}>{title}</p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+        {options.map((opt) => {
+          const on = selected.includes(opt);
+          return (
+            <button
+              key={opt}
+              onClick={() => onToggle(opt)}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 20,
+                border: `0.5px solid ${on ? "var(--ink)" : "var(--border)"}`,
+                background: on ? "var(--ink)" : "var(--surface)",
+                color: on ? "var(--white)" : "var(--muted)",
+                fontSize: 11,
+                fontWeight: on ? 500 : 400,
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function ProfileScreen({ onNavigate, isSignedIn, user, darkMode, onToggleDarkMode, readIds, savedIds, onSignIn, onSignOut, feedView, onChangeFeedView }) {
+  const [prefsOpen, setPrefsOpen] = useState(false);
+  const [selectedLaw, setSelectedLaw] = useState([...LAW_CATS]);
+  const [selectedCourts, setSelectedCourts] = useState([...COURTS]);
+  const [selectedSources, setSelectedSources] = useState(NEWS_SOURCES.slice(0, 3));
+
+  const toggle = (setter, value) =>
+    setter((prev) => prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]);
+
   if (!isSignedIn) {
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -20,182 +66,92 @@ export function ProfileScreen({ onNavigate, isSignedIn, user, darkMode, onToggle
     );
   }
 
-  const groups = [
-    {
-      section: "PREFERENCES",
-      items: [
-        { Icon: Ic.Settings, label: "Feed preferences", note: "Direct Tax, Indirect Tax" },
-        { Icon: Ic.Bell, label: "Notifications" },
-        { Icon: Ic.Tag, label: "Manage topics" },
-      ]
-    },
-    { section: "MIRA", items: [{ Icon: Ic.Mira, label: "Mira chat history" }] },
-    { section: "ACCOUNT", items: [{ Icon: Ic.Help, label: "Help & support" }, { Icon: Ic.Logout, label: "Sign out", danger: true, action: onSignOut }] },
-  ];
-
   const username = user?.email?.split("@")[0] || "";
-  const initials =
-    username.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "U";
+  const initials = username.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "U";
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <TopBar showProfile={false} />
+
+      {/* User info */}
       <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: 12, borderBottom: "0.5px solid var(--border)", flexShrink: 0 }}>
-        <div
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: "50%",
-            background: "var(--surface)",
-            border: "0.5px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 16,
-            fontWeight: 500,
-            color: "var(--ink)"
-          }}
-        >
+        <div style={{ width: 52, height: 52, borderRadius: "50%", background: "var(--surface)", border: "0.5px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 500, color: "var(--ink)" }}>
           {initials}
         </div>
         <div>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
-            {username || "LexLegis User"}
-          </p>
-          <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
-            {user?.email}
-          </p>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--ink)", margin: 0 }}>{username || "LexLegis User"}</p>
+          <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>{user?.email}</p>
         </div>
         <button style={{ marginLeft: "auto", background: "none", border: "none", display: "flex" }}><Ic.Edit c="var(--muted)" s={18} /></button>
-        <button onClick={() => onNavigate("admin")}>
-          Open Admin
-        </button>
+        <button onClick={() => onNavigate("admin")}>Open Admin</button>
       </div>
+
+      {/* Stats */}
       <div style={{ display: "flex", borderBottom: "0.5px solid var(--border)", flexShrink: 0 }}>
-        {[
-          [savedIds?.length || 0, "Saved"],
-          [readIds?.length || 0, "Read"],
-          [0, "Mira chats"],
-        ].map(([number, label], index) => (
+        {[[savedIds?.length || 0, "Saved"], [readIds?.length || 0, "Read"], [0, "Mira chats"]].map(([number, label], index) => (
           <div key={label} style={{ flex: 1, padding: "12px 0", textAlign: "center", borderRight: index < 2 ? "0.5px solid var(--border)" : "none" }}>
             <p style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: "var(--ink)", margin: 0 }}>{number}</p>
             <p style={{ fontSize: 10, color: "var(--muted)", margin: 0 }}>{label}</p>
           </div>
         ))}
       </div>
+
       <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 80px" }}>
-        {groups.map((group) => (
-          <div key={group.section}>
-            <p style={{ fontSize: 10, color: "var(--muted)", padding: "14px 0 4px", fontWeight: 500, letterSpacing: 0.5 }}>
-              {group.section}
-            </p>
 
-            {group.items.map((item) => (
-              <SettingsRow key={item.label} {...item} onClick={item.action} />
-            ))}
+        <p style={{ fontSize: 10, color: "var(--muted)", padding: "14px 0 4px", fontWeight: 500, letterSpacing: 0.5 }}>PREFERENCES</p>
 
-            {group.section === "PREFERENCES" && (
-              <>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    padding: "12px 0",
-                    borderBottom: "0.5px solid var(--border)",
-                  }}
-                >
-                  {[
-                    ["glance", "Glance"],
-                    ["reader", "Reader"],
-                  ].map(([value, label]) => (
-                    <button
-                      key={value}
-                      onClick={() => onChangeFeedView(value)}
-                      style={{
-                        flex: 1,
-                        padding: "10px",
-                        borderRadius: 12,
-                        border: "0.5px solid var(--border)",
-                        background:
-                          feedView === value
-                            ? "var(--ink)"
-                            : "var(--surface)",
-                        color:
-                          feedView === value
-                            ? "var(--white)"
-                            : "var(--ink)",
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
+        {/* Feed & Topics expandable */}
+        <div style={{ borderBottom: "0.5px solid var(--border)" }}>
+          <button
+            onClick={() => setPrefsOpen((v) => !v)}
+            style={{ width: "100%", background: "none", border: "none", display: "flex", alignItems: "center", gap: 12, padding: "13px 0", cursor: "pointer" }}
+          >
+            <Ic.Settings c="var(--muted)" s={22} />
+            <span style={{ flex: 1, fontSize: 14, color: "var(--ink)", textAlign: "left" }}>Feed & Topics</span>
+            <span style={{ fontSize: 10, color: "var(--muted)", marginRight: 4 }}>
+              {selectedLaw.slice(0, 2).join(", ")}{selectedLaw.length > 2 ? ` +${selectedLaw.length - 2}` : ""}
+            </span>
+            <span style={{ fontSize: 12, color: "var(--muted)", transition: "transform 0.2s", display: "inline-block", transform: prefsOpen ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
+          </button>
 
-                <div
-                  onClick={onToggleDarkMode}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "13px 0",
-                    borderBottom: "0.5px solid var(--border)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <Ic.Settings c="var(--muted)" s={22} />
+          {prefsOpen && (
+            <div style={{ paddingBottom: 16 }}>
+              <PillGroup title="LAW CATEGORY" options={LAW_CATS} selected={selectedLaw} onToggle={(v) => toggle(setSelectedLaw, v)} />
+              <PillGroup title="COURT" options={COURTS} selected={selectedCourts} onToggle={(v) => toggle(setSelectedCourts, v)} />
+              <PillGroup title="NEWS SOURCES" options={NEWS_SOURCES} selected={selectedSources} onToggle={(v) => toggle(setSelectedSources, v)} />
+            </div>
+          )}
+        </div>
 
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        color: "var(--ink)",
-                        margin: 0,
-                      }}
-                    >
-                      Dark mode
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 11,
-                        color: "var(--muted)",
-                        margin: 0,
-                      }}
-                    >
-                      Switch app appearance
-                    </p>
-                  </div>
+        {/* Feed view toggle */}
+        <div style={{ display: "flex", gap: 8, padding: "12px 0", borderBottom: "0.5px solid var(--border)" }}>
+          {[["glance", "Glance"], ["reader", "Reader"]].map(([value, label]) => (
+            <button key={value} onClick={() => onChangeFeedView(value)} style={{ flex: 1, padding: "10px", borderRadius: 12, border: "0.5px solid var(--border)", background: feedView === value ? "var(--ink)" : "var(--surface)", color: feedView === value ? "var(--white)" : "var(--ink)", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+              {label}
+            </button>
+          ))}
+        </div>
 
-                  <div
-                    style={{
-                      width: 42,
-                      height: 24,
-                      borderRadius: 999,
-                      background: darkMode ? "var(--ink)" : "var(--surface-2)",
-                      padding: 3,
-                      display: "flex",
-                      justifyContent: darkMode ? "flex-end" : "flex-start",
-                      transition: "all 0.2s",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: "50%",
-                        background: darkMode ? "var(--white)" : "#fff",
-                        transition: "all 0.2s",
-                      }}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+        {/* Dark mode */}
+        <div onClick={onToggleDarkMode} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 0", borderBottom: "0.5px solid var(--border)", cursor: "pointer" }}>
+          <Ic.Settings c="var(--muted)" s={22} />
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 14, color: "var(--ink)", margin: 0 }}>Dark mode</p>
+            <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>Switch app appearance</p>
           </div>
-        ))}
+          <div style={{ width: 42, height: 24, borderRadius: 999, background: darkMode ? "var(--ink)" : "var(--surface-2)", padding: 3, display: "flex", justifyContent: darkMode ? "flex-end" : "flex-start", transition: "all 0.2s" }}>
+            <div style={{ width: 18, height: 18, borderRadius: "50%", background: darkMode ? "var(--white)" : "#fff", transition: "all 0.2s" }} />
+          </div>
+        </div>
+
+        <p style={{ fontSize: 10, color: "var(--muted)", padding: "14px 0 4px", fontWeight: 500, letterSpacing: 0.5 }}>MIRA</p>
+        <SettingsRow Icon={Ic.Mira} label="Mira chat history" />
+
+        <p style={{ fontSize: 10, color: "var(--muted)", padding: "14px 0 4px", fontWeight: 500, letterSpacing: 0.5 }}>ACCOUNT</p>
+        <SettingsRow Icon={Ic.Help} label="Help & support" />
+        <SettingsRow Icon={Ic.Logout} label="Sign out" danger onClick={onSignOut} />
       </div>
+
       <BottomNav active="profile" onNavigate={onNavigate} />
     </div>
   );
