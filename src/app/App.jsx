@@ -11,6 +11,7 @@ import { AdminScreen } from "../screens/AdminScreen.jsx";
 import { ShareSheet } from "../components/ui/ShareSheet.jsx";
 import { MoreSheet } from "../components/ui/MoreSheet.jsx";
 import { MediaTestScreen } from "../screens/MediaTestScreen.jsx";
+import { useLang } from "../hooks/useLang.js";
 
 export default function App() {
   const [screen, setScreen] = useState("home");
@@ -27,6 +28,7 @@ export default function App() {
   const { user, isSignedIn, signIn, signOut } = useAuth();
   const { savedIds, toggleSave } = useSavedArticles();
   const [shareArticle, setShareArticle] = useState(null);
+  const { lang, setLang } = useLang();
 
   const [feedView, setFeedView] = useState(() => {
     return localStorage.getItem("lexnews_feed_view") || "glance";
@@ -75,6 +77,7 @@ export default function App() {
           darkMode={darkMode}
           feedView={feedView}
           onChangeFeedView={updateFeedView}
+          lang={lang}
         />
       )}
 
@@ -93,6 +96,7 @@ export default function App() {
           onNeedSignIn={handleNeedSignIn}
           darkMode={darkMode}
           user={user}
+          lang={lang}
         />
       )}
 
@@ -109,6 +113,8 @@ export default function App() {
           onSignOut={signOut}
           feedView={feedView}
           onChangeFeedView={updateFeedView}
+          lang={lang}
+          onChangeLang={setLang}
         />
       )}
 

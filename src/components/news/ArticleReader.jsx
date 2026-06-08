@@ -3,6 +3,8 @@ import { Ic } from "../../constants/icons.jsx";
 import { IconButton } from "../ui/IconButton.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
 import { Tag } from "./Tag.jsx";
+import { useTranslation } from "../../hooks/useTranslation.js";
+import { LANGUAGES } from "../../hooks/useLang.js";
 
 export function ArticleReader({
   articles,
@@ -17,12 +19,13 @@ export function ArticleReader({
   hasMore,
   loadingMore,
   onLoadMore,
+  lang,
 }) {
   const slidesRef = useRef(null);
 
   useEffect(() => {
-    if (slidesRef.current) slidesRef.current.scrollTop =
-  startIndex * slidesRef.current.clientHeight;
+    if (slidesRef.current)
+      slidesRef.current.scrollTop = startIndex * slidesRef.current.clientHeight;
   }, [startIndex]);
 
   return (
@@ -31,18 +34,22 @@ export function ArticleReader({
       ref={slidesRef}
       onScroll={(event) => {
         const element = event.currentTarget;
-
         const nearBottom =
-          element.scrollTop + element.clientHeight >=
-          element.scrollHeight - 1200;
-
-        if (nearBottom && hasMore && !loadingMore && onLoadMore) {
-          onLoadMore();
-        }
+          element.scrollTop + element.clientHeight >= element.scrollHeight - 1200;
+        if (nearBottom && hasMore && !loadingMore && onLoadMore) onLoadMore();
       }}
     >
       {articles.map((article, index) => (
-        <ReaderSlide key={article.id} article={article} onClose={onClose} saved={savedIds.includes(article.id)} onSave={onSave} onShare={onShare} isLast={index === articles.length - 1} />
+        <ReaderSlide
+          key={article.id}
+          article={article}
+          onClose={onClose}
+          saved={savedIds.includes(article.id)}
+          onSave={onSave}
+          onShare={onShare}
+          isLast={index === articles.length - 1}
+          lang={lang}
+        />
       ))}
       {hasMore ? (
         <div className="reader-slide" style={{ alignItems: "center", justifyContent: "center" }}>
@@ -60,31 +67,74 @@ export function ArticleReader({
   );
 }
 
-function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast }) {
+function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast, lang }) {
+  const { translated, loading } = useTranslation(article, lang);
+
+  const displayTitle = translated?.title || article.title;
+  const summaryText = article.ai_summary || article.body || "";
+  const displaySummary = translated?.summary || summaryText;
+
+  const langLabel = lang ? LANGUAGES.find((l) => l.code === lang)?.native : null;
+
+  // Truncate summary to ~60 words
+  const truncate = (text) => {
+    const words = text.split(/\s+/);
+    if (words.length <= 60) return text;
+    const truncated = words.slice(0, 60).join(" ");
+    const lastSentence = truncated.search(/[.!?][^.!?]*$/);
+    return lastSentence !== -1 ? truncated.slice(0, lastSentence + 1) : truncated + "…";
+  };
+
   return (
     <div className="reader-slide">
       <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
-        <IconButton onClick={onClose} label="Close article"><Ic.Back s={18} c="var(--ink)" /></IconButton>
+        <IconButton onClick={onClose} label="Close article">
+          <Ic.Back s={18} c="var(--ink)" />
+        </IconButton>
       </div>
       <div style={{ position: "absolute", top: 16, right: 16, zIndex: 10, display: "flex", gap: 8 }}>
-        <IconButton onClick={() => onSave(article.id)} label="Save article"><Ic.Bookmark s={18} c={saved ? "var(--ink)" : "var(--muted)"} fill={saved ? "var(--ink)" : "none"} /></IconButton>
-        <IconButton
-          label="Share article"
-          onClick={() => {
-            if (onShare) onShare(article);
-          }}
-        >
+        <IconButton onClick={() => onSave(article.id)} label="Save article">
+          <Ic.Bookmark s={18} c={saved ? "var(--ink)" : "var(--muted)"} fill={saved ? "var(--ink)" : "none"} />
+        </IconButton>
+        <IconButton label="Share article" onClick={() => onShare && onShare(article)}>
           <Ic.Share s={18} c="var(--muted)" />
         </IconButton>
-        <IconButton label="More options"><Ic.More s={18} c="var(--muted)" /></IconButton>
+        <IconButton label="More options">
+          <Ic.More s={18} c="var(--muted)" />
+        </IconButton>
       </div>
+
       <ArticleImage article={article} height={280} />
+
       <div style={{ flex: 1, overflowY: "auto", padding: "0 0 100px" }}>
         <div style={{ padding: "18px 20px 0" }}>
           <Tag article={article} />
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--ink)", lineHeight: 1.3, marginTop: 10, marginBottom: 6 }}>{article.title}</h1>
-          <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16 }}>{article.date} · {article.readTime}</p>
-          {article.ai_summary ? (
+
+          {/* Title — translated or original */}
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 22,
+              fontWeight: 600,
+              color: "var(--ink)",
+              lineHeight: 1.3,
+              marginTop: 10,
+              marginBottom: 6,
+            }}
+          >
+            {loading ? (
+              <span style={{ opacity: 0.4 }}>{article.title}</span>
+            ) : (
+              displayTitle
+            )}
+          </h1>
+
+          <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16 }}>
+            {article.date} · {article.readTime}
+          </p>
+
+          {/* Summary block */}
+          {(article.ai_summary || article.body) && (
             <div
               style={{
                 background: "var(--surface)",
@@ -94,62 +144,127 @@ function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast }) {
                 marginBottom: 20,
               }}
             >
-              <p
+              {/* Label row */}
+              <div
                 style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "var(--muted)",
-                  letterSpacing: 0.4,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   marginBottom: 8,
                 }}
               >
-                LEXLEGIS SUMMARY
-              </p>
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--muted)",
+                    letterSpacing: 0.4,
+                    margin: 0,
+                  }}
+                >
+                  LEXLEGIS SUMMARY
+                </p>
+                {langLabel && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: "var(--muted)",
+                      background: "var(--surface-2)",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: 20,
+                      padding: "2px 8px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {langLabel}
+                  </span>
+                )}
+              </div>
 
-              <p
-                style={{
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  color: "var(--ink)",
-                  whiteSpace: "pre-line",
-                  margin: 0,
-                }}
-              >
-                {(() => {
-                const words = article.ai_summary.split(/\s+/);
-                if (words.length <= 60) return article.ai_summary;
-                const truncated = words.slice(0, 60).join(" ");
-                const lastSentence = truncated.search(/[.!?][^.!?]*$/);
-                return lastSentence !== -1
-                  ? truncated.slice(0, lastSentence + 1)
-                  : truncated + "…";
-              })()}
-              </p>
+              {loading ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {[100, 90, 70].map((w, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        height: 12,
+                        borderRadius: 6,
+                        width: `${w}%`,
+                        background: "var(--border)",
+                        opacity: 0.6,
+                        animation: "pulse 1.4s ease-in-out infinite",
+                        animationDelay: `${i * 0.15}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 1.7,
+                    color: "var(--ink)",
+                    whiteSpace: "pre-line",
+                    margin: 0,
+                  }}
+                >
+                  {truncate(displaySummary)}
+                </p>
+              )}
             </div>
-          ) : (
+          )}
+
+          {/* Sources */}
+          <div style={{ borderTop: "0.5px solid var(--border)", paddingTop: 16, marginBottom: 24 }}>
             <p
               style={{
-                fontSize: 14,
-                color: "var(--ink-2)",
-                lineHeight: 1.75,
-                whiteSpace: "pre-line",
-                marginBottom: 24,
+                fontSize: 10,
+                color: "var(--muted)",
+                fontWeight: 500,
+                letterSpacing: 0.5,
+                marginBottom: 10,
               }}
             >
-              {article.body}
+              SOURCES ({article.sources.length})
             </p>
-          )}
-          <div style={{ borderTop: "0.5px solid var(--border)", paddingTop: 16, marginBottom: 24 }}>
-            <p style={{ fontSize: 10, color: "var(--muted)", fontWeight: 500, letterSpacing: 0.5, marginBottom: 10 }}>SOURCES ({article.sources.length})</p>
             {article.sources.map((source, index) => (
-              <a key={source.name} href={source.url} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", borderBottom: index < article.sources.length - 1 ? "0.5px solid var(--border)" : "none", textDecoration: "none" }}>
+              <a
+                key={source.name}
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 0",
+                  borderBottom:
+                    index < article.sources.length - 1 ? "0.5px solid var(--border)" : "none",
+                  textDecoration: "none",
+                }}
+              >
                 <Ic.External c="var(--ink)" />
-                <span style={{ fontSize: 12, color: "var(--ink)", flex: 1, textDecoration: "underline" }}>{source.name}</span>
+                <span style={{ fontSize: 12, color: "var(--ink)", flex: 1, textDecoration: "underline" }}>
+                  {source.name}
+                </span>
                 <span style={{ fontSize: 10, color: "var(--muted)" }}>{source.time}</span>
               </a>
             ))}
           </div>
-          {!isLast && <p style={{ textAlign: "center", fontSize: 11, color: "var(--muted)", letterSpacing: 0.3, paddingBottom: 8 }}>Swipe up for next article</p>}
+
+          {!isLast && (
+            <p
+              style={{
+                textAlign: "center",
+                fontSize: 11,
+                color: "var(--muted)",
+                letterSpacing: 0.3,
+                paddingBottom: 8,
+              }}
+            >
+              Swipe up for next article
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -160,12 +275,7 @@ function EndOfNewsSlide({ onClose, onViewOlder }) {
   return (
     <div
       className="reader-slide"
-      style={{
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 32,
-        textAlign: "center",
-      }}
+      style={{ alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}
     >
       <p
         style={{
@@ -176,20 +286,11 @@ function EndOfNewsSlide({ onClose, onViewOlder }) {
           marginBottom: 8,
         }}
       >
-        You’re all caught up
+        You're all caught up
       </p>
-
-      <p
-        style={{
-          fontSize: 13,
-          color: "var(--muted)",
-          lineHeight: 1.6,
-          marginBottom: 20,
-        }}
-      >
-        You’ve reached the end of the latest news feed.
+      <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6, marginBottom: 20 }}>
+        You've reached the end of the latest news feed.
       </p>
-
       {onViewOlder && (
         <button
           onClick={onViewOlder}
@@ -208,7 +309,6 @@ function EndOfNewsSlide({ onClose, onViewOlder }) {
           View older news
         </button>
       )}
-
       <button
         onClick={onClose}
         style={{
