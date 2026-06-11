@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Lexlegis.ai</string>
+    <string name="title_activity_main">Lexlegis.ai</string>
+    <string name="package_name">ai.lexlegis.app</string>
+    <string name="custom_url_scheme">ai.lexlegis.app</string>
+</resources>
