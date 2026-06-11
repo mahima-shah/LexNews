@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Ic } from "../../constants/icons.jsx";
 import { IconButton } from "../ui/IconButton.jsx";
 import { ArticleImage } from "./ArticleImage.jsx";
@@ -20,12 +20,15 @@ export function ArticleReader({
   loadingMore,
   onLoadMore,
   lang,
+  onMira,           // ← new: opens Mira with article context
 }) {
   const slidesRef = useRef(null);
+  const [visibleIndex, setVisibleIndex] = useState(startIndex);
 
   useEffect(() => {
     if (slidesRef.current)
       slidesRef.current.scrollTop = startIndex * slidesRef.current.clientHeight;
+    setVisibleIndex(startIndex);
   }, [startIndex]);
 
   return (
@@ -33,9 +36,14 @@ export function ArticleReader({
       className="reader-slides"
       ref={slidesRef}
       onScroll={(event) => {
-        const element = event.currentTarget;
+        const el = event.currentTarget;
+
+        // Track which slide is currently visible
+        const index = Math.round(el.scrollTop / el.clientHeight);
+        setVisibleIndex(index);
+
         const nearBottom =
-          element.scrollTop + element.clientHeight >= element.scrollHeight - 1200;
+          el.scrollTop + el.clientHeight >= el.scrollHeight - 1200;
         if (nearBottom && hasMore && !loadingMore && onLoadMore) onLoadMore();
       }}
     >
@@ -47,8 +55,10 @@ export function ArticleReader({
           saved={savedIds.includes(article.id)}
           onSave={onSave}
           onShare={onShare}
+          onMira={onMira}     // ← pass down to each slide
           isLast={index === articles.length - 1}
           lang={lang}
+          isVisible={index === visibleIndex}
         />
       ))}
       {hasMore ? (
@@ -67,8 +77,8 @@ export function ArticleReader({
   );
 }
 
-function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast, lang }) {
-  const { translated, loading } = useTranslation(article, lang);
+function ReaderSlide({ article, onClose, saved, onSave, onShare, onMira, isLast, lang, isVisible }) {
+  const { translated, loading } = useTranslation(article, lang, isVisible);
 
   const displayTitle = translated?.title || article.title;
   const summaryText = article.ai_summary || article.body || "";
@@ -99,6 +109,12 @@ function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast, lang })
         <IconButton label="Share article" onClick={() => onShare && onShare(article)}>
           <Ic.Share s={18} c="var(--muted)" />
         </IconButton>
+        {/* MIRA button — opens Mira with this article as context */}
+        {onMira && (
+          <IconButton label="Ask Mira about this article" onClick={() => onMira(article)}>
+            <Ic.Mira s={18} c="var(--muted)" />
+          </IconButton>
+        )}
         <IconButton label="More options">
           <Ic.More s={18} c="var(--muted)" />
         </IconButton>
@@ -212,6 +228,42 @@ function ReaderSlide({ article, onClose, saved, onSave, onShare, isLast, lang })
                 </p>
               )}
             </div>
+          )}
+
+          {/* Ask Mira inline prompt — shows at the bottom of each article */}
+          {onMira && (
+            <button
+              onClick={() => onMira(article)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                width: "100%",
+                padding: "12px 14px",
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: 12,
+                cursor: "pointer",
+                marginBottom: 20,
+                textAlign: "left",
+              }}
+            >
+              <div
+                className="logo-box"
+                style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0 }}
+              >
+                <Ic.Mira c="#fff" s={14} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 12, fontWeight: 500, color: "var(--ink)", margin: 0 }}>
+                  Ask Mira about this article
+                </p>
+                <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
+                  Legal AI · Tap to chat
+                </p>
+              </div>
+              <Ic.Up c="var(--muted)" s={14} style={{ transform: "rotate(90deg)" }} />
+            </button>
           )}
 
           {/* Sources */}

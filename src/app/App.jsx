@@ -16,6 +16,7 @@ import { useLang } from "../hooks/useLang.js";
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [miraOpen, setMiraOpen] = useState(false);
+  const [miraArticle, setMiraArticle] = useState(null); // ← tracks which article Mira was opened from
   const [showSignIn, setShowSignIn] = useState(false);
   const [moreArticle, setMoreArticle] = useState(null);
   const [readIds, setReadIds] = useState(() => {
@@ -39,9 +40,16 @@ export default function App() {
     localStorage.setItem("lexnews_feed_view", view);
   };
 
+  // Call this to open Mira without article context (from nav)
+  // Call openMiraWithArticle(article) to open from within an article
+  const openMiraWithArticle = (article = null) => {
+    setMiraArticle(article);
+    setMiraOpen(true);
+  };
+
   const handleNavigate = (id) => {
     if (id === "mira") {
-      setMiraOpen(true);
+      openMiraWithArticle(null);
       return;
     }
     setScreen(id);
@@ -78,6 +86,7 @@ export default function App() {
           feedView={feedView}
           onChangeFeedView={updateFeedView}
           lang={lang}
+          onMira={openMiraWithArticle}  // ← pass this down to article screens
         />
       )}
 
@@ -97,6 +106,7 @@ export default function App() {
           darkMode={darkMode}
           user={user}
           lang={lang}
+          onMira={openMiraWithArticle}  // ← pass here too if articles appear in saved
         />
       )}
 
@@ -131,6 +141,9 @@ export default function App() {
       <MiraPanel
         open={miraOpen}
         onClose={() => setMiraOpen(false)}
+        articleId={miraArticle?.id || ""}
+        articleTitle={miraArticle?.title || ""}
+        articleSummary={miraArticle?.ai_summary || miraArticle?.body || ""}
       />
 
       {shareArticle && (

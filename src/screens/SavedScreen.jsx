@@ -18,6 +18,7 @@ export function SavedScreen({
   isSignedIn,
   onNeedSignIn,
   user,               // ← pass from App.jsx via useAuth
+  onMira,             // ← opens Mira with article context
 }) {
   const [category, setCategory] = useState("all");
   const [articles, setArticles] = useState([]);
@@ -192,6 +193,7 @@ export function SavedScreen({
             onClose={() => setReaderOpen(false)}
             savedIds={savedIds}
             onSave={onSave}
+            onMira={onMira}
           />
         )}
       </div>
