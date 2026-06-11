@@ -77,7 +77,7 @@ function useDragScroll() {
   return ref;
 }
 
-export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onNeedSignIn, onShare, onMore, onRead, feedView, onChangeFeedView, darkMode, lang }) {
+export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onNeedSignIn, onShare, onMore, onRead, feedView, onChangeFeedView, darkMode, lang, onMira }) {
   const [category, setCategory] = useState("all");
   const [court, setCourt] = useState("all");
   const [articles, setArticles] = useState([]);
@@ -238,6 +238,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
             canViewOlder={!olderMode}
             embedded={true}
             lang={lang}
+            onMira={onMira}
           />
         </div>
       ) : (
@@ -323,6 +324,7 @@ export function HomeScreen({ onNavigate, savedIds, onSave, isSignedIn, user, onN
             }}
             canViewOlder={!olderMode}
             lang={lang}
+            onMira={onMira}
           />
         )}
       </div>

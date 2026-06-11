@@ -339,7 +339,16 @@ button { cursor: pointer; }
 }
 
 /* Mira */
-.mira-backdrop { border-radius: inherit; }
+.mira-backdrop {
+  border-radius: inherit;
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+}
 .mira-backdrop.open { opacity: 1; pointer-events: auto; }
 .mira-sheet {
   position: absolute; left: 0; right: 0; bottom: 0;
@@ -382,7 +391,7 @@ button { cursor: pointer; }
   padding: 10px 13px;
   font-size: 13px;
   line-height: 1.55;
-  color: var(--white);
+  color: #fff;
   max-width: 86%;
   align-self: flex-end;
 }
